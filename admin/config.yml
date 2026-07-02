@@ -1,0 +1,50 @@
+# Sveltia CMS configuration for Skans docs.
+# Activates the browser editor at https://docs.skanslabs.com/admin once the two
+# GitHub prerequisites are done (see README / the memory note):
+#   1. Push this project to a GitHub repo (set `repo` below).
+#   2. Create a GitHub OAuth app so editors can sign in.
+#
+# Content model matches the generator: Markdown files with frontmatter
+# (title, eyebrow, description) + body, under content/<version>/<group>/.
+
+backend:
+  name: github
+  repo: skanslabs/docs        # <-- set to the real repo (owner/name)
+  branch: main
+
+# where drag-and-drop image uploads land (per current version)
+media_folder: "content/2.0/images"
+public_folder: "/2.0/images"
+
+# nicer editing experience
+editor:
+  preview: false
+
+collections:
+  - name: getting-started
+    label: "Getting Started"
+    label_singular: "Page"
+    folder: "content/2.0/getting-started"
+    create: true
+    extension: md
+    format: frontmatter
+    slug: "{{slug}}"
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: eyebrow, label: Eyebrow, widget: string, required: false, default: "Getting Started" }
+      - { name: description, label: Description (SEO), widget: text, required: false }
+      - { name: body, label: Body, widget: markdown }
+
+  - name: how-tos
+    label: "How-tos"
+    label_singular: "How-to"
+    folder: "content/2.0/how-tos"
+    create: true
+    extension: md
+    format: frontmatter
+    slug: "{{slug}}"
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: eyebrow, label: Eyebrow, widget: string, required: false, default: "How-tos" }
+      - { name: description, label: Description (SEO), widget: text, required: false }
+      - { name: body, label: Body, widget: markdown }
