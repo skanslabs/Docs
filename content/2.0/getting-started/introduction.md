@@ -48,3 +48,5 @@ New to the platform? The fastest way to see value is to stand up a single applia
 - **[Requirements](/2.0/getting-started/requirements/)** — what you need before you install.
 - **[Installation](/2.0/getting-started/installation/)** — bring the appliance online.
 - **[Enroll a device](/2.0/how-tos/enroll-a-device/)** — give your first device an identity.
+
+<!-- e2e-autopublish-1782983839 -->
