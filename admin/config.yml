@@ -1,15 +1,14 @@
 # Sveltia CMS configuration for Skans docs.
-# Activates the browser editor at https://docs.skanslabs.com/admin once the two
-# GitHub prerequisites are done (see README / the memory note):
-#   1. Push this project to a GitHub repo (set `repo` below).
-#   2. Create a GitHub OAuth app so editors can sign in.
+# Editor lives at https://docs.skanslabs.com/admin — sign in with the
+# "Sign In with Token" button (GitHub personal access token, repo scope).
+# No OAuth app / auth relay needed.
 #
 # Content model matches the generator: Markdown files with frontmatter
 # (title, eyebrow, description) + body, under content/<version>/<group>/.
 
 backend:
   name: github
-  repo: skanslabs/docs        # <-- set to the real repo (owner/name)
+  repo: skanslabs/Docs
   branch: main
 
 # where drag-and-drop image uploads land (per current version)

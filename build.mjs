@@ -288,4 +288,11 @@ fs.mkdirSync(path.join(DIST, "fonts"), { recursive: true });
 for (const f of fs.readdirSync(SITE_FONTS)) fs.copyFileSync(path.join(SITE_FONTS, f), path.join(DIST, "fonts", f));
 fs.copyFileSync(path.join(SITE_PUB, "favicon.svg"), path.join(DIST, "favicon.svg"));
 fs.writeFileSync(path.join(DIST, "docs.js"), CLIENT_JS);
+// CMS admin portal (Sveltia) — copy admin/ -> dist/admin
+const ADMIN = path.join(ROOT, "admin");
+if (fs.existsSync(ADMIN)) {
+  fs.mkdirSync(path.join(DIST, "admin"), { recursive: true });
+  for (const f of fs.readdirSync(ADMIN)) fs.copyFileSync(path.join(ADMIN, f), path.join(DIST, "admin", f));
+  console.log("  admin portal copied → /admin");
+}
 console.log("  assets copied · search index:", searchIndex.length, "docs · home:", home);
