@@ -1,0 +1,7 @@
+{
+  "productName": "Skans",
+  "repo": "https://github.com/skanslabs/skans",
+  "versions": [
+    { "id": "2.0", "label": "v2.0", "latest": true }
+  ]
+}

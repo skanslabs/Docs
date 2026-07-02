@@ -1,0 +1,16 @@
+[
+  {
+    "group": "Getting Started",
+    "items": [
+      { "title": "Introduction", "slug": "getting-started/introduction" },
+      { "title": "Requirements", "slug": "getting-started/requirements" },
+      { "title": "Installation", "slug": "getting-started/installation" }
+    ]
+  },
+  {
+    "group": "How-tos",
+    "items": [
+      { "title": "Enroll a device", "slug": "how-tos/enroll-a-device" }
+    ]
+  }
+]

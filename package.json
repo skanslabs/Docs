@@ -1,0 +1,23 @@
+{
+  "name": "skanslabs-docs",
+  "version": "0.1.0",
+  "description": "Skans Labs product documentation — hand-built, on-brand, versioned static docs (THE SEAM).",
+  "type": "module",
+  "scripts": {
+    "css": "tailwindcss -i src/docs.css -o dist/styles.css --minify",
+    "html": "node build.mjs",
+    "build": "npm run html && npm run css",
+    "watch": "node build.mjs --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.2",
+    "tailwindcss": "^4.3.2"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "highlight.js": "^11.10.0",
+    "markdown-it": "^14.1.0",
+    "markdown-it-anchor": "^9.2.0",
+    "markdown-it-container": "^4.0.0"
+  }
+}
