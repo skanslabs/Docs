@@ -28,4 +28,4 @@ Never paste device credentials into config files or scripts. Use the console's c
 
 Approve the device. Skans issues a certificate from the built-in CA and installs it where the camera supports it. On the device's detail page you'll now see a valid identity, an online/managed state, and correlated findings.
 
-That's it — the camera now has its own identity, sits behind access control, and produces compliance evidence as it runs. Full details are in **[Enroll a device](/2.0/how-tos/enroll-a-device/)**.
+That's it — the camera now has its own identity, sits behind access control, and produces compliance evidence as it runs. Full details are in **[Enroll a device](https://docs.skanslabs.com/2.0/how-tos/enroll-a-device/)**.

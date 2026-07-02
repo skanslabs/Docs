@@ -10,8 +10,12 @@ import hljs from "highlight.js";
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const CONTENT = path.join(ROOT, "content");
 const DIST = path.join(ROOT, "dist");
+const DIST_BLOG = path.join(ROOT, "dist-blog");
 const SITE_FONTS = path.join(ROOT, "assets/fonts");
 const FAVICON = path.join(ROOT, "assets/favicon.svg");
+// The docs and blog are served on separate hostnames; cross-links go absolute.
+const DOCS_URL = "https://docs.skanslabs.com";
+const BLOG_URL = "https://blog.skanslabs.com";
 
 const slugify = (s) =>
   String(s).trim().toLowerCase()
@@ -211,13 +215,13 @@ function versionMenu(curVer, slug) {
   return `<details class="verswitch"><summary>v${curVer}${cur?.latest ? "" : ""}<svg class="caret" viewBox="0 0 24 24"><use href="#ic-caret"/></svg></summary><div class="verswitch-menu">${rows}</div></details>`;
 }
 
-function topbar({ active = "docs", ver = "", side = false } = {}) {
+function topbar({ active = "docs", ver = "", side = false, search = true, brandHref = "/", docsHref = "/", blogHref = "/blog/" } = {}) {
   return `<header class="dh"><div class="dh-inner">
 ${side ? `<button class="icon-btn side-toggle" id="sideToggle" aria-label="Open navigation"><svg viewBox="0 0 24 24"><use href="#ic-menu"/></svg></button>` : ""}
-<a class="dh-brand" href="/"><svg class="brand-mark" viewBox="0 0 48 56"><use href="#m-shield"/></svg><span class="dh-word">SK<svg class="peak" viewBox="0 0 100 100"><use href="#m-peak"/></svg>NS</span></a>
-<nav class="dh-nav"><a href="/" class="${active === "docs" ? "on" : ""}">Docs</a><a href="/blog/" class="${active === "blog" ? "on" : ""}">Blog</a></nav>
+<a class="dh-brand" href="${brandHref}"><svg class="brand-mark" viewBox="0 0 48 56"><use href="#m-shield"/></svg><span class="dh-word">SK<svg class="peak" viewBox="0 0 100 100"><use href="#m-peak"/></svg>NS</span></a>
+<nav class="dh-nav"><a href="${docsHref}" class="${active === "docs" ? "on" : ""}">Docs</a><a href="${blogHref}" class="${active === "blog" ? "on" : ""}">Blog</a></nav>
 <div class="dh-spacer"></div>
-<button class="searchbtn" id="searchOpen"><svg viewBox="0 0 24 24"><use href="#ic-search"/></svg><span>Search docs</span><span class="kbd">⌘K</span></button>
+${search ? `<button class="searchbtn" id="searchOpen"><svg viewBox="0 0 24 24"><use href="#ic-search"/></svg><span>Search docs</span><span class="kbd">⌘K</span></button>` : ""}
 ${ver}
 <a class="icon-btn" href="https://skanslabs.com" aria-label="skanslabs.com" title="Main site"><svg viewBox="0 0 48 56"><use href="#m-shield"/></svg></a>
 <a class="icon-btn" href="${REPO}" aria-label="GitHub"><svg viewBox="0 0 24 24"><use href="#ic-gh"/></svg></a>
@@ -246,6 +250,8 @@ function flatten(nav) { return nav.flatMap((g) => g.items.map((it) => ({ ...it, 
 /* ---------- render everything ---------- */
 fs.rmSync(DIST, { recursive: true, force: true });
 fs.mkdirSync(DIST, { recursive: true });
+fs.rmSync(DIST_BLOG, { recursive: true, force: true });
+fs.mkdirSync(DIST_BLOG, { recursive: true });
 const searchIndex = [];
 
 for (const v of versions.versions) {
@@ -267,7 +273,7 @@ for (const v of versions.versions) {
     const eyebrow = fm.eyebrow ? `<span class="doc-eyebrow">${fm.eyebrow}</span>` : "";
     const pn = `<nav class="prevnext">${prev ? `<a class="pn prev" href="/${v.id}/${prev.slug}/"><span class="pn-dir">← Previous</span><span class="pn-title">${prev.title}</span></a>` : "<span></span>"}${next ? `<a class="pn next" href="/${v.id}/${next.slug}/"><span class="pn-dir">Next →</span><span class="pn-title">${next.title}</span></a>` : "<span></span>"}</nav>`;
 
-    const html = HEAD(title, fm.description) + SPRITE + topbar({ active: "docs", ver: versionMenu(v.id, item.slug), side: true })
+    const html = HEAD(title, fm.description) + SPRITE + topbar({ active: "docs", ver: versionMenu(v.id, item.slug), side: true, blogHref: `${BLOG_URL}/` })
       + `<div class="shell">` + sidebar(nav, v.id, item.slug)
       + `<main class="content"><article class="prose">${crumbs}${eyebrow}<h1>${title}</h1>${bodyHtml}${pn}</article></main>`
       + tocHtml(toc)
@@ -292,6 +298,7 @@ function fmtDate(s){ const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(s||"")); ret
 const catClass = (c)=>"cat-"+slugify(c||"post");
 const ARROW = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 7l5 5-5 5"/></svg>`;
 const BLOGDIR = path.join(CONTENT, "blog");
+const MEDIA = path.join(CONTENT, "media");
 let posts = [];
 if (fs.existsSync(BLOGDIR)) {
   posts = fs.readdirSync(BLOGDIR).filter((f)=>f.endsWith(".md")).map((f)=>{
@@ -300,26 +307,35 @@ if (fs.existsSync(BLOGDIR)) {
   }).sort((a,b)=>String(b.fm.date||"").localeCompare(String(a.fm.date||"")));
 }
 if (posts.length) {
+  // The blog is its own site at blog.skanslabs.com: index at "/", posts at "/<slug>/".
+  const blogBar = { active: "blog", search: false, brandHref: "/", docsHref: `${DOCS_URL}/`, blogHref: "/" };
+  // Links to docs pages inside a post body (e.g. /2.0/…) point at the docs host.
+  const linkToDocs = (html) => html.replace(/href="\/(\d)/g, `href="${DOCS_URL}/$1`);
   const cats = [...new Set(posts.map((p)=>p.fm.category).filter(Boolean))];
   const chips = `<button class="fchip on" data-filter="all">All</button>` + cats.map((c)=>`<button class="fchip" data-filter="${slugify(c)}">${c}</button>`).join("");
   const cards = posts.map((p)=>{
     const cat = p.fm.category || "Post";
     const cover = p.fm.cover ? `<img src="${p.fm.cover}" alt="">` : "";
-    return `<a class="post-card" data-cat="${slugify(cat)}" href="/blog/${p.slug}/"><div class="post-cover">${cover}<span class="post-cat ${catClass(cat)}">${cat}</span></div><div class="post-body"><div class="post-meta">${fmtDate(p.fm.date)}${p.fm.author?` · ${md.utils.escapeHtml(p.fm.author)}`:""}</div><h3>${md.utils.escapeHtml(p.fm.title||p.slug)}</h3><p>${md.utils.escapeHtml(p.fm.excerpt||"")}</p><span class="post-more">Read post ${ARROW}</span></div></a>`;
+    return `<a class="post-card" data-cat="${slugify(cat)}" href="/${p.slug}/"><div class="post-cover">${cover}<span class="post-cat ${catClass(cat)}">${cat}</span></div><div class="post-body"><div class="post-meta">${fmtDate(p.fm.date)}${p.fm.author?` · ${md.utils.escapeHtml(p.fm.author)}`:""}</div><h3>${md.utils.escapeHtml(p.fm.title||p.slug)}</h3><p>${md.utils.escapeHtml(p.fm.excerpt||"")}</p><span class="post-more">Read post ${ARROW}</span></div></a>`;
   }).join("");
-  const indexHtml = HEAD("Blog", "Announcements and how-tos from Skans Labs.") + SPRITE + topbar({ active: "blog" })
+  const indexHtml = HEAD("Blog", "Announcements and how-tos from Skans Labs.") + SPRITE + topbar(blogBar)
     + `<main class="blog-wrap"><div class="blog-hero"><span class="blog-eyebrow">Skans Labs</span><h1>Blog</h1><p>Product announcements, release notes, and hands-on how-tos.</p></div><div class="blog-filters">${chips}</div><div class="blog-grid" id="blogGrid">${cards}</div></main><script src="/docs.js" defer></script></body></html>`;
-  fs.mkdirSync(path.join(DIST, "blog"), { recursive: true });
-  fs.writeFileSync(path.join(DIST, "blog", "index.html"), indexHtml);
+  fs.writeFileSync(path.join(DIST_BLOG, "index.html"), indexHtml);
   posts.forEach((p)=>{
     const cat = p.fm.category || "Post";
     const cover = p.fm.cover ? `<div class="post-hero-cover"><img src="${p.fm.cover}" alt=""></div>` : `<div class="post-hero-cover"></div>`;
-    const html = HEAD(p.fm.title||p.slug, p.fm.excerpt) + SPRITE + topbar({ active: "blog" })
-      + `<article class="post-article"><a class="post-back" href="/blog/">← All posts</a>${cover}<div class="post-head"><span class="post-cat ${catClass(cat)}">${cat}</span><h1>${md.utils.escapeHtml(p.fm.title||p.slug)}</h1><div class="post-byline">${p.fm.author?`<b>${md.utils.escapeHtml(p.fm.author)}</b><span class="dot"></span>`:""}${fmtDate(p.fm.date)}</div></div><div class="prose">${md.render(p.content)}</div></article><script src="/docs.js" defer></script></body></html>`;
-    fs.mkdirSync(path.join(DIST, "blog", p.slug), { recursive: true });
-    fs.writeFileSync(path.join(DIST, "blog", p.slug, "index.html"), html);
+    const html = HEAD(p.fm.title||p.slug, p.fm.excerpt) + SPRITE + topbar(blogBar)
+      + `<article class="post-article"><a class="post-back" href="/">← All posts</a>${cover}<div class="post-head"><span class="post-cat ${catClass(cat)}">${cat}</span><h1>${md.utils.escapeHtml(p.fm.title||p.slug)}</h1><div class="post-byline">${p.fm.author?`<b>${md.utils.escapeHtml(p.fm.author)}</b><span class="dot"></span>`:""}${fmtDate(p.fm.date)}</div></div><div class="prose">${linkToDocs(md.render(p.content))}</div></article><script src="/docs.js" defer></script></body></html>`;
+    fs.mkdirSync(path.join(DIST_BLOG, p.slug), { recursive: true });
+    fs.writeFileSync(path.join(DIST_BLOG, p.slug, "index.html"), html);
   });
-  console.log(`  built blog — ${posts.length} posts`);
+  // self-contained assets for the blog host (styles.css is copied in after the CSS step)
+  fs.mkdirSync(path.join(DIST_BLOG, "fonts"), { recursive: true });
+  for (const f of fs.readdirSync(SITE_FONTS)) fs.copyFileSync(path.join(SITE_FONTS, f), path.join(DIST_BLOG, "fonts", f));
+  fs.copyFileSync(FAVICON, path.join(DIST_BLOG, "favicon.svg"));
+  fs.writeFileSync(path.join(DIST_BLOG, "docs.js"), CLIENT_JS);
+  if (fs.existsSync(MEDIA)) fs.cpSync(MEDIA, path.join(DIST_BLOG, "media"), { recursive: true });
+  console.log(`  built blog (standalone) — ${posts.length} posts → dist-blog`);
 }
 
 /* root redirect -> latest intro */
@@ -344,7 +360,6 @@ if (fs.existsSync(ADMIN)) {
   console.log("  admin portal copied → /admin");
 }
 // CMS-uploaded media (images, covers) — copy content/media -> dist/media
-const MEDIA = path.join(CONTENT, "media");
 if (fs.existsSync(MEDIA)) {
   fs.cpSync(MEDIA, path.join(DIST, "media"), { recursive: true });
   console.log("  media copied → /media");

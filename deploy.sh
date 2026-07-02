@@ -13,4 +13,10 @@ tar czf - -C dist . | ssh -o StrictHostKeyChecking=accept-new nginx@192.168.109.
    && find /var/www/docs -mindepth 1 -delete && cp -a ~/docs.new/. /var/www/docs/ \
    && rm -rf ~/docs.new'
 
-echo "✓ live at https://docs.skanslabs.com/"
+echo "▸ publishing dist-blog/ → nginx@192.168.109.239:/var/www/blog …"
+tar czf - -C dist-blog . | ssh -o StrictHostKeyChecking=accept-new nginx@192.168.109.239 \
+  'rm -rf ~/blog.new && mkdir -p ~/blog.new && tar xzf - -C ~/blog.new \
+   && find /var/www/blog -mindepth 1 -delete && cp -a ~/blog.new/. /var/www/blog/ \
+   && rm -rf ~/blog.new'
+
+echo "✓ live at https://docs.skanslabs.com/  and  https://blog.skanslabs.com/"

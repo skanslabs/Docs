@@ -6,7 +6,7 @@
   "scripts": {
     "css": "tailwindcss -i src/docs.css -o dist/styles.css --minify",
     "html": "node build.mjs",
-    "build": "npm run html && npm run css",
+    "build": "npm run html && npm run css && cp dist/styles.css dist-blog/styles.css",
     "watch": "node build.mjs --watch"
   },
   "devDependencies": {

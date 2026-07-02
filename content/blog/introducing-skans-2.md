@@ -19,4 +19,4 @@ Today we're announcing **Skans 2.0** — the release that turns an isolated came
 
 Skans is air-gap-first. The whole root of trust — identity, certificates, access control, monitoring, patching, and audit — runs on the local network itself. When a feature needs outside data, it comes in through a controlled, signed update, never by opening the enclave to the internet.
 
-Ready to try it? Start with the **[Installation guide](/2.0/getting-started/installation/)**, then **[enroll your first device](/2.0/how-tos/enroll-a-device/)**.
+Ready to try it? Start with the **[Installation guide](https://docs.skanslabs.com/2.0/getting-started/installation/)**, then **[enroll your first device](https://docs.skanslabs.com/2.0/how-tos/enroll-a-device/)**.
