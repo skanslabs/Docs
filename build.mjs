@@ -90,6 +90,17 @@ const CLIENT_JS = String.raw`(function(){
     }
     results.innerHTML=out.join('');
   }
+  // blog category filter
+  var grid=document.getElementById('blogGrid');
+  if(grid){
+    document.querySelectorAll('.fchip').forEach(function(ch){
+      ch.addEventListener('click',function(){
+        document.querySelectorAll('.fchip').forEach(function(x){x.classList.remove('on');});
+        ch.classList.add('on');var f=ch.dataset.filter;
+        grid.querySelectorAll('.post-card').forEach(function(c){c.style.display=(f==='all'||c.dataset.cat===f)?'':'none';});
+      });
+    });
+  }
   var so=document.getElementById('searchOpen');if(so)so.addEventListener('click',open);
   document.addEventListener('keydown',function(e){
     if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();open();}
@@ -200,13 +211,14 @@ function versionMenu(curVer, slug) {
   return `<details class="verswitch"><summary>v${curVer}${cur?.latest ? "" : ""}<svg class="caret" viewBox="0 0 24 24"><use href="#ic-caret"/></svg></summary><div class="verswitch-menu">${rows}</div></details>`;
 }
 
-function header(curVer, slug) {
+function topbar({ active = "docs", ver = "", side = false } = {}) {
   return `<header class="dh"><div class="dh-inner">
-<button class="icon-btn side-toggle" id="sideToggle" aria-label="Open navigation"><svg viewBox="0 0 24 24"><use href="#ic-menu"/></svg></button>
-<a class="dh-brand" href="/"><svg class="brand-mark" viewBox="0 0 48 56"><use href="#m-shield"/></svg><span class="dh-word">SK<svg class="peak" viewBox="0 0 100 100"><use href="#m-peak"/></svg>NS</span><span class="dh-docs">Docs</span></a>
+${side ? `<button class="icon-btn side-toggle" id="sideToggle" aria-label="Open navigation"><svg viewBox="0 0 24 24"><use href="#ic-menu"/></svg></button>` : ""}
+<a class="dh-brand" href="/"><svg class="brand-mark" viewBox="0 0 48 56"><use href="#m-shield"/></svg><span class="dh-word">SK<svg class="peak" viewBox="0 0 100 100"><use href="#m-peak"/></svg>NS</span></a>
+<nav class="dh-nav"><a href="/" class="${active === "docs" ? "on" : ""}">Docs</a><a href="/blog/" class="${active === "blog" ? "on" : ""}">Blog</a></nav>
 <div class="dh-spacer"></div>
 <button class="searchbtn" id="searchOpen"><svg viewBox="0 0 24 24"><use href="#ic-search"/></svg><span>Search docs</span><span class="kbd">⌘K</span></button>
-${versionMenu(curVer, slug)}
+${ver}
 <a class="icon-btn" href="https://skanslabs.com" aria-label="skanslabs.com" title="Main site"><svg viewBox="0 0 48 56"><use href="#m-shield"/></svg></a>
 <a class="icon-btn" href="${REPO}" aria-label="GitHub"><svg viewBox="0 0 24 24"><use href="#ic-gh"/></svg></a>
 <button class="theme-toggle icon-btn" id="themeToggle" aria-label="Toggle theme"><svg class="ic-sun" viewBox="0 0 24 24"><use href="#ic-sun"/></svg><svg class="ic-moon" viewBox="0 0 24 24"><use href="#ic-moon"/></svg></button>
@@ -255,7 +267,7 @@ for (const v of versions.versions) {
     const eyebrow = fm.eyebrow ? `<span class="doc-eyebrow">${fm.eyebrow}</span>` : "";
     const pn = `<nav class="prevnext">${prev ? `<a class="pn prev" href="/${v.id}/${prev.slug}/"><span class="pn-dir">← Previous</span><span class="pn-title">${prev.title}</span></a>` : "<span></span>"}${next ? `<a class="pn next" href="/${v.id}/${next.slug}/"><span class="pn-dir">Next →</span><span class="pn-title">${next.title}</span></a>` : "<span></span>"}</nav>`;
 
-    const html = HEAD(title, fm.description) + SPRITE + header(v.id, item.slug)
+    const html = HEAD(title, fm.description) + SPRITE + topbar({ active: "docs", ver: versionMenu(v.id, item.slug), side: true })
       + `<div class="shell">` + sidebar(nav, v.id, item.slug)
       + `<main class="content"><article class="prose">${crumbs}${eyebrow}<h1>${title}</h1>${bodyHtml}${pn}</article></main>`
       + tocHtml(toc)
@@ -272,6 +284,42 @@ for (const v of versions.versions) {
     }
   });
   console.log(`  built v${v.id} — ${flat.length} pages`);
+}
+
+/* ---------- blog (announcements + how-tos) ---------- */
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+function fmtDate(s){ const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(s||"")); return m?`${MONTHS[+m[2]-1]} ${+m[3]}, ${m[1]}`:String(s||""); }
+const catClass = (c)=>"cat-"+slugify(c||"post");
+const ARROW = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 7l5 5-5 5"/></svg>`;
+const BLOGDIR = path.join(CONTENT, "blog");
+let posts = [];
+if (fs.existsSync(BLOGDIR)) {
+  posts = fs.readdirSync(BLOGDIR).filter((f)=>f.endsWith(".md")).map((f)=>{
+    const { data: fm, content } = matter(fs.readFileSync(path.join(BLOGDIR, f), "utf8"));
+    return { slug: f.replace(/\.md$/, ""), fm, content };
+  }).sort((a,b)=>String(b.fm.date||"").localeCompare(String(a.fm.date||"")));
+}
+if (posts.length) {
+  const cats = [...new Set(posts.map((p)=>p.fm.category).filter(Boolean))];
+  const chips = `<button class="fchip on" data-filter="all">All</button>` + cats.map((c)=>`<button class="fchip" data-filter="${slugify(c)}">${c}</button>`).join("");
+  const cards = posts.map((p)=>{
+    const cat = p.fm.category || "Post";
+    const cover = p.fm.cover ? `<img src="${p.fm.cover}" alt="">` : "";
+    return `<a class="post-card" data-cat="${slugify(cat)}" href="/blog/${p.slug}/"><div class="post-cover">${cover}<span class="post-cat ${catClass(cat)}">${cat}</span></div><div class="post-body"><div class="post-meta">${fmtDate(p.fm.date)}${p.fm.author?` · ${md.utils.escapeHtml(p.fm.author)}`:""}</div><h3>${md.utils.escapeHtml(p.fm.title||p.slug)}</h3><p>${md.utils.escapeHtml(p.fm.excerpt||"")}</p><span class="post-more">Read post ${ARROW}</span></div></a>`;
+  }).join("");
+  const indexHtml = HEAD("Blog", "Announcements and how-tos from Skans Labs.") + SPRITE + topbar({ active: "blog" })
+    + `<main class="blog-wrap"><div class="blog-hero"><span class="blog-eyebrow">Skans Labs</span><h1>Blog</h1><p>Product announcements, release notes, and hands-on how-tos.</p></div><div class="blog-filters">${chips}</div><div class="blog-grid" id="blogGrid">${cards}</div></main><script src="/docs.js" defer></script></body></html>`;
+  fs.mkdirSync(path.join(DIST, "blog"), { recursive: true });
+  fs.writeFileSync(path.join(DIST, "blog", "index.html"), indexHtml);
+  posts.forEach((p)=>{
+    const cat = p.fm.category || "Post";
+    const cover = p.fm.cover ? `<div class="post-hero-cover"><img src="${p.fm.cover}" alt=""></div>` : `<div class="post-hero-cover"></div>`;
+    const html = HEAD(p.fm.title||p.slug, p.fm.excerpt) + SPRITE + topbar({ active: "blog" })
+      + `<article class="post-article"><a class="post-back" href="/blog/">← All posts</a>${cover}<div class="post-head"><span class="post-cat ${catClass(cat)}">${cat}</span><h1>${md.utils.escapeHtml(p.fm.title||p.slug)}</h1><div class="post-byline">${p.fm.author?`<b>${md.utils.escapeHtml(p.fm.author)}</b><span class="dot"></span>`:""}${fmtDate(p.fm.date)}</div></div><div class="prose">${md.render(p.content)}</div></article><script src="/docs.js" defer></script></body></html>`;
+    fs.mkdirSync(path.join(DIST, "blog", p.slug), { recursive: true });
+    fs.writeFileSync(path.join(DIST, "blog", p.slug, "index.html"), html);
+  });
+  console.log(`  built blog — ${posts.length} posts`);
 }
 
 /* root redirect -> latest intro */
@@ -294,5 +342,11 @@ if (fs.existsSync(ADMIN)) {
   fs.mkdirSync(path.join(DIST, "admin"), { recursive: true });
   for (const f of fs.readdirSync(ADMIN)) fs.copyFileSync(path.join(ADMIN, f), path.join(DIST, "admin", f));
   console.log("  admin portal copied → /admin");
+}
+// CMS-uploaded media (images, covers) — copy content/media -> dist/media
+const MEDIA = path.join(CONTENT, "media");
+if (fs.existsSync(MEDIA)) {
+  fs.cpSync(MEDIA, path.join(DIST, "media"), { recursive: true });
+  console.log("  media copied → /media");
 }
 console.log("  assets copied · search index:", searchIndex.length, "docs · home:", home);

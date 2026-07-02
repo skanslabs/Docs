@@ -12,8 +12,8 @@ backend:
   branch: main
 
 # where drag-and-drop image uploads land (per current version)
-media_folder: "content/2.0/images"
-public_folder: "/2.0/images"
+media_folder: "content/media"
+public_folder: "/media"
 
 # nicer editing experience
 editor:
@@ -46,4 +46,23 @@ collections:
       - { name: title, label: Title, widget: string }
       - { name: eyebrow, label: Eyebrow, widget: string, required: false, default: "How-tos" }
       - { name: description, label: Description (SEO), widget: text, required: false }
+      - { name: body, label: Body, widget: markdown }
+
+  - name: blog
+    label: "Blog"
+    label_singular: "Post"
+    folder: "content/blog"
+    create: true
+    extension: md
+    format: frontmatter
+    slug: "{{slug}}"
+    summary: "{{title}}  ·  {{date}}"
+    sortable_fields: [date, title]
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: date, label: Date, widget: datetime, format: "YYYY-MM-DD", date_format: "YYYY-MM-DD", time_format: false }
+      - { name: author, label: Author, widget: string, default: "Skans Labs" }
+      - { name: category, label: Category, widget: select, options: ["Announcement", "How-to"], default: "Announcement" }
+      - { name: excerpt, label: Excerpt, widget: text }
+      - { name: cover, label: Cover image, widget: image, required: false, hint: "Optional. Leave empty for a branded gradient cover." }
       - { name: body, label: Body, widget: markdown }
