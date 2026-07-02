@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import matter from "gray-matter";
 import MarkdownIt from "markdown-it";
@@ -112,6 +113,12 @@ const CLIENT_JS = String.raw`(function(){
   });
 })();`;
 
+// Cache-busting: styles.css / docs.js are served with a long (30d) cache but are not
+// fingerprinted. Hash their source so the <link>/<script> URL changes when they change,
+// forcing browsers to fetch fresh CSS/JS instead of showing a stale cached version.
+const CSS_VER = crypto.createHash("sha1").update(fs.readFileSync(path.join(ROOT, "src/docs.css"))).digest("hex").slice(0, 8);
+const JS_VER = crypto.createHash("sha1").update(CLIENT_JS).digest("hex").slice(0, 8);
+
 /* ---------- markdown-it ---------- */
 const md = new MarkdownIt({
   html: true, linkify: true, typographer: true,
@@ -203,7 +210,7 @@ const HEAD = (title, desc, depthPrefix) => `<!DOCTYPE html><html lang="en" data-
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/fonts/space-grotesk-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/styles.css?v=${CSS_VER}">
 </head><body>`;
 
 function versionMenu(curVer, slug) {
@@ -277,7 +284,7 @@ for (const v of versions.versions) {
       + `<div class="shell">` + sidebar(nav, v.id, item.slug)
       + `<main class="content"><article class="prose">${crumbs}${eyebrow}<h1>${title}</h1>${bodyHtml}${pn}</article></main>`
       + tocHtml(toc)
-      + `</div><div class="scrim" id="scrim"></div><script src="/docs.js" defer></script></body></html>`;
+      + `</div><div class="scrim" id="scrim"></div><script src="/docs.js?v=${JS_VER}" defer></script></body></html>`;
 
     const outDir = path.join(DIST, v.id, item.slug);
     fs.mkdirSync(outDir, { recursive: true });
@@ -319,13 +326,13 @@ if (posts.length) {
     return `<a class="post-card" data-cat="${slugify(cat)}" href="/${p.slug}/"><div class="post-cover">${cover}<span class="post-cat ${catClass(cat)}">${cat}</span></div><div class="post-body"><div class="post-meta">${fmtDate(p.fm.date)}${p.fm.author?` · ${md.utils.escapeHtml(p.fm.author)}`:""}</div><h3>${md.utils.escapeHtml(p.fm.title||p.slug)}</h3><p>${md.utils.escapeHtml(p.fm.excerpt||"")}</p><span class="post-more">Read post ${ARROW}</span></div></a>`;
   }).join("");
   const indexHtml = HEAD("Blog", "Announcements and how-tos from Skans Labs.") + SPRITE + topbar(blogBar)
-    + `<main class="blog-wrap"><div class="blog-hero"><span class="blog-eyebrow">Skans Labs</span><h1>Blog</h1><p>Product announcements, release notes, and hands-on how-tos.</p></div><div class="blog-filters">${chips}</div><div class="blog-grid" id="blogGrid">${cards}</div></main><script src="/docs.js" defer></script></body></html>`;
+    + `<main class="blog-wrap"><div class="blog-hero"><span class="blog-eyebrow">Skans Labs</span><h1>Blog</h1><p>Product announcements, release notes, and hands-on how-tos.</p></div><div class="blog-filters">${chips}</div><div class="blog-grid" id="blogGrid">${cards}</div></main><script src="/docs.js?v=${JS_VER}" defer></script></body></html>`;
   fs.writeFileSync(path.join(DIST_BLOG, "index.html"), indexHtml);
   posts.forEach((p)=>{
     const cat = p.fm.category || "Post";
     const cover = p.fm.cover ? `<div class="post-hero-cover"><img src="${p.fm.cover}" alt=""></div>` : `<div class="post-hero-cover"></div>`;
     const html = HEAD(p.fm.title||p.slug, p.fm.excerpt) + SPRITE + topbar(blogBar)
-      + `<article class="post-article"><a class="post-back" href="/">← All posts</a>${cover}<div class="post-head"><span class="post-cat ${catClass(cat)}">${cat}</span><h1>${md.utils.escapeHtml(p.fm.title||p.slug)}</h1><div class="post-byline">${p.fm.author?`<b>${md.utils.escapeHtml(p.fm.author)}</b><span class="dot"></span>`:""}${fmtDate(p.fm.date)}</div></div><div class="prose">${linkToDocs(md.render(p.content))}</div></article><script src="/docs.js" defer></script></body></html>`;
+      + `<article class="post-article"><a class="post-back" href="/">← All posts</a>${cover}<div class="post-head"><span class="post-cat ${catClass(cat)}">${cat}</span><h1>${md.utils.escapeHtml(p.fm.title||p.slug)}</h1><div class="post-byline">${p.fm.author?`<b>${md.utils.escapeHtml(p.fm.author)}</b><span class="dot"></span>`:""}${fmtDate(p.fm.date)}</div></div><div class="prose">${linkToDocs(md.render(p.content))}</div></article><script src="/docs.js?v=${JS_VER}" defer></script></body></html>`;
     fs.mkdirSync(path.join(DIST_BLOG, p.slug), { recursive: true });
     fs.writeFileSync(path.join(DIST_BLOG, p.slug, "index.html"), html);
   });
