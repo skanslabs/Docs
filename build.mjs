@@ -10,8 +10,8 @@ import hljs from "highlight.js";
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const CONTENT = path.join(ROOT, "content");
 const DIST = path.join(ROOT, "dist");
-const SITE_FONTS = "/home/david/skanslabs-site/public/fonts";
-const SITE_PUB = "/home/david/skanslabs-site/public";
+const SITE_FONTS = path.join(ROOT, "assets/fonts");
+const FAVICON = path.join(ROOT, "assets/favicon.svg");
 
 const slugify = (s) =>
   String(s).trim().toLowerCase()
@@ -286,7 +286,7 @@ fs.writeFileSync(path.join(DIST, "search-index.json"), JSON.stringify(searchInde
 /* assets */
 fs.mkdirSync(path.join(DIST, "fonts"), { recursive: true });
 for (const f of fs.readdirSync(SITE_FONTS)) fs.copyFileSync(path.join(SITE_FONTS, f), path.join(DIST, "fonts", f));
-fs.copyFileSync(path.join(SITE_PUB, "favicon.svg"), path.join(DIST, "favicon.svg"));
+fs.copyFileSync(FAVICON, path.join(DIST, "favicon.svg"));
 fs.writeFileSync(path.join(DIST, "docs.js"), CLIENT_JS);
 // CMS admin portal (Sveltia) — copy admin/ -> dist/admin
 const ADMIN = path.join(ROOT, "admin");
