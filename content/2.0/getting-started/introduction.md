@@ -1,50 +1,34 @@
 ---
 title: Introduction
 eyebrow: Getting Started
-description: What Skans is, who it's for, and how the pieces fit together.
+description: What Skans is, who runs it, and what to read next.
 ---
 
-**Skans is NIST security-in-a-box for isolated networks** — the video-surveillance, IoT, OT, and building-automation enclaves that were never designed to defend themselves. It gives every device on the wire its own identity, encryption, access control, and continuous compliance evidence, and it's set up by the same technician who installs the cameras — no security team required.
+Skans turns an **isolated network** — the kind of islanded camera, IoT, OT, or building-automation enclave that can't touch the cloud or a corporate directory — into a fully governed environment, without a security team and without ever phoning home.
 
-The guiding principle is simple: **everything inside, nothing out.** Skans is air-gap-first. It brings a full root of trust — identity, certificates, access control, monitoring, patching, and audit — onto the local network itself, so an enclave can meet modern security baselines without ever phoning home to a cloud.
+It's a single appliance that becomes the enclave's **root of trust**: it stands up the directory and certificate authority the network never had, gives **every device its own identity**, and then layers on access control, patching, hardening, backup, monitoring, and audit-ready compliance evidence. Everything runs on the local network itself — the guiding principle is **everything inside, nothing out.**
 
-::: note
-These docs describe the appliance and its console. If you're evaluating Skans for a site, start here, then work through **Requirements** and **Installation**.
-:::
+## Who runs it
+
+Skans is designed to be set up by the **technician who installs the equipment** — the person hanging cameras and pulling cable — not a network engineer or a PKI expert. Setup is two or three plain questions and one button. You see outcomes ("✓ cameras encrypted · 2 certs expiring"), never the directory, CA, or RADIUS internals underneath.
+
+That said, there's real depth for the admins who want it. Getting Started and How-tos are written for the operator; Concepts and Reference go deeper for anyone who wants the architecture, PKI, and control mappings.
 
 ## What you get
 
-- **Device identity for everything.** Cameras, controllers, sensors, and Windows endpoints each get their own credential from a built-in certificate authority — no shared passwords.
-- **Access control on the wire.** 802.1X / MAC-based NAC with dynamic VLANs keeps unknown devices off the network and quarantines the rest.
-- **Monitoring & correlation.** Findings are correlated and deduplicated per device — you see a bounded, meaningful list, never a raw firehose of events.
-- **Patching without the cloud.** Endpoint agents schedule updates locally, so isolated Windows machines stay current.
-- **Compliance evidence, automatically.** Controls map to NIST families and produce audit-ready records as the system runs.
-
-## How it's built
-
-Skans runs as a small always-on appliance. Larger or multi-site deployments add lightweight **Edges** that collect and cache locally and report to a central **Core**.
-
-```text
-                 ┌─────────────────────────────┐
-   isolated      │            CORE             │   identity · policy
-   enclave  ───▶ │  AD DS · AD CS · NPS · UI   │   monitoring · audit
-                 └──────────────┬──────────────┘
-                                │  mTLS, store-and-forward
-              ┌─────────────────┼─────────────────┐
-          ┌───┴───┐         ┌───┴───┐          ┌───┴───┐
-          │ EDGE  │         │ EDGE  │          │ EDGE  │   collect · cache
-          │site A │         │site B │          │site C │   per site
-          └───────┘         └───────┘          └───────┘
-```
-
-Windows endpoints run a **lightweight agent** (patch scheduling, Defender posture, log shipping); cameras, IoT, and OT devices are managed **agentlessly** over their native protocols.
-
-::: tip
-New to the platform? The fastest way to see value is to stand up a single appliance, enroll one device, and watch it appear in the console — the **Installation** and **Enroll a device** guides walk through exactly that.
-:::
+- **Device identity for everything.** Cameras, controllers, sensors, and Windows endpoints each get their own certificate from a built-in certificate authority — pushed even to devices that can't enroll themselves. No shared passwords.
+- **Access control on the wire.** 802.1X (EAP-TLS) admission keeps unknown devices off the network.
+- **Monitoring & correlation.** Findings are correlated and deduplicated per device — a bounded, meaningful list, never a raw firehose of events.
+- **Patching without the cloud.** A lightweight agent schedules updates locally so isolated Windows machines stay current.
+- **Compliance evidence.** A one-command NIST/CMMC evidence pack, generated from live state.
 
 ## Where to go next
 
-- **[Requirements](/2.0/getting-started/requirements/)** — what you need before you install.
-- **[Installation](/2.0/getting-started/installation/)** — bring the appliance online.
-- **[Enroll a device](/2.0/how-tos/enroll-a-device/)** — give your first device an identity.
+- **[How Skans works →](/2.0/getting-started/how-skans-works/)** — the mental model (start here)
+- **[Requirements →](/2.0/getting-started/requirements/)** — what a site needs
+- **[Installation →](/2.0/getting-started/installation/)** — bring an appliance online
+- **[Quickstart →](/2.0/getting-started/quickstart/)** — a secured site in about 15 minutes
+
+::: note
+These docs describe Skans 2.0. Screens and steps track the shipping appliance; anything still on the roadmap is called out explicitly so you always know what's real today.
+:::

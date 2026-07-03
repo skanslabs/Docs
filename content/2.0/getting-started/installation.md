@@ -1,71 +1,75 @@
 ---
 title: Installation
 eyebrow: Getting Started
-description: Bring a Skans appliance online and reach the console for the first time.
+description: Bring a Skans appliance online and stand up a secured site with the setup wizard.
 ---
 
-This guide takes a fresh appliance to a working console you can log into. It mirrors a real first-run: boot, set identity, reach the console, and verify services.
+Installing Skans is deliberately not a systems-administration task. You rack the appliance, answer two or three plain questions in the **setup wizard**, and it stands up the directory, certificate authority, network trust, and time services on its own — resuming across the reboots it needs, with no PowerShell and no PKI knowledge required.
 
 ::: note
-These are representative steps for the v2.0 appliance image. Exact screens may differ slightly by build — the console guides you through anything not shown here.
+There is no command line to memorize. Everything below is the wizard's own on-screen flow. Screens may differ slightly by build; the wizard guides you through anything not shown here.
 :::
 
-## 1. Boot the appliance
+## 1. Plug in and power on
 
-Connect the appliance to your management switch and power it on. On first boot it provisions its internal services (directory, certificate authority, policy, console) — this takes a few minutes.
+Rack the appliance, patch it into the enclave switch, and power it on. On first boot it prepares its internal services — this takes a few minutes and includes one or more automatic reboots as it promotes the directory and certificate authority. A startup task resumes the process across each reboot and removes itself when setup is complete, so you can leave it running.
 
-## 2. Set the hostname and network
+## 2. Open the console and let it detect the network
 
-From the first-boot console, set the appliance identity and management address. You can let Skans run DHCP/DNS for the enclave, or give it a static address alongside your existing services.
-
-```bash
-# example: set a static management address (first-boot shell)
-skans net set --interface mgmt0 \
-  --address 192.168.50.10/24 \
-  --gateway 192.168.50.1 \
-  --hostname skans-core-01
-```
-
-## 3. Reach the console
-
-Point a browser on the management network at the appliance over HTTPS:
+Browse to the appliance from a machine on the enclave. The wizard opens on **Step 1 — Detect** and shows what it found:
 
 ```text
-https://skans-core-01.local     (or the IP you set)
+Found network: 192.168.102.0/24, gateway .1
+No existing directory detected.
+3 devices seen.
 ```
 
-The appliance presents its own certificate from the built-in CA. Sign in with the administrator credential from first boot.
+Confirm the detected network (or pick the enclave NIC if the box has more than one). Skans auto-detects the subnet, any existing directory, and nearby devices — you confirm rather than configure.
 
 ::: tip
-Can't reach it? Confirm you're on the management subnet and that the appliance finished provisioning (the front-panel/console shows **READY**). Skans never depends on the internet to bring up its own console.
+If Skans detects a healthy existing Active Directory, it offers **guest mode** here — it will integrate with that directory instead of becoming a second domain controller. For a greenfield enclave with no directory, it takes the full self-contained path and *becomes* the domain.
 :::
 
-## 4. Verify core services
+## 3. Name the site
 
-In the console, open **System → Services**. You should see the identity, certificate, policy, monitoring, and scheduler services all running (green). This confirms the root of trust is live.
+This is the only real input. On **Step 2 — Name this site** you provide:
 
-```bash
-# or from the appliance shell
-skans status --services
-```
+1. **A site name** (for example, `Acme`). Skans derives the domain, hostnames, and certificate organization from it.
+2. **An admin password** for the console — or accept a generated one, which is shown once and sealed into the final report.
 
-Expected output (abridged):
-
-```text
-SERVICE            STATE     DETAIL
-directory          running   AD DS · 1 domain
-certificate-auth   running   AD CS · issuing
-policy             running   NPS · RADIUS ready
-monitoring         running   collector + correlation
-scheduler          running   0 jobs due
-```
-
-## 5. Next: enroll your first device
-
-The appliance is now a working root of trust. Give a real device an identity and watch it appear in the console:
-
-- **[Enroll a device →](/2.0/how-tos/enroll-a-device/)**
+Press **Set up this site**.
 
 ::: warning
-Change the initial administrator password immediately, and store recovery material (CA recovery key, admin credentials) **off the appliance** in your password manager. Losing them means re-provisioning.
+The generated admin and recovery credentials are shown **once** and printed on the completion report. Store them — and the CA recovery material — **off the appliance**, in your password manager. Losing them means re-provisioning the site.
+:::
+
+## 4. Watch it build
+
+On **Step 3 — Building your site**, a progress bar runs unattended for roughly 5–10 minutes and reports plain checkmarks as each foundation service comes up:
+
+```text
+✓ Identity service ready        (directory / AD DS)
+✓ Certificate authority ready   (AD CS)
+✓ Network trust published       (GPO)
+✓ Time & naming ready           (NTP, DNS)
+```
+
+This is idempotent and self-healing — if you close the browser or the box reboots, it picks up where it left off. When it finishes, the enclave has a working root of trust: an identity service, a certificate authority whose trust is published to the network, and synchronized time and naming.
+
+## 5. You're on the console
+
+When "Building your site" completes, you land on the Skans console, signed in with the administrator credential from Step 3. The appliance now presents its own certificate from the built-in CA.
+
+The hardened baseline (FIPS mode, a CIS/STIG policy baseline, TLS everywhere, no default credentials) is already applied — you didn't have to do anything for it.
+
+## Next: secure your devices
+
+The site is stood up. The next step of the wizard — **Find & secure devices** — discovers what's on the enclave and gives each device an identity:
+
+- **[Quickstart →](/2.0/getting-started/quickstart/)** — run the whole thing end to end in about 15 minutes
+- **[Enroll a device →](/2.0/how-tos/enroll-a-device/)** — the agentless (camera / IoT) flow in detail
+- **[Install & approve the Windows agent →](/2.0/how-tos/install-the-agent/)** — the Windows server / workstation lane
+
+::: note
+Two optional settings live in the wizard and are safe to skip — an **off-box backup target** (disabled until you set a path) and an **outward alert channel** (SMTP/webhook, with a "send a test" button). On-box alerting always records regardless, so an air-gapped site loses nothing by leaving them off.
 :::
