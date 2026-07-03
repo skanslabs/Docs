@@ -12,6 +12,41 @@ It's built to be run by the technician who installs the equipment — not a secu
 This page is the mental model. If you just want to get a box running, jump to the **[Quickstart](/2.0/getting-started/quickstart/)**. If you're an admin who wants the deeper architecture, each concept below links out to detail.
 :::
 
+## Architecture at a glance
+
+```mermaid
+flowchart LR
+  op["Operator<br/>(browser)"]:::ext
+  win["Windows endpoints<br/>Skans Agent"]:::ext
+  ot["Cameras · IoT · OT<br/>(agentless)"]:::ext
+
+  subgraph APP["Skans appliance — the enclave's root of trust"]
+    direction TB
+    core["Trusted Core<br/>console · CA · directory<br/>signing key · orchestration"]:::core
+    hub["Agent Hub<br/>mTLS gateway · holds no key"]:::gw
+    coll["Collector<br/>SNMP · syslog"]:::gw
+    dh["Driver Host<br/>vendor drivers · sandboxed"]:::gw
+    store[("Monitoring store ·<br/>secrets vault · SQL")]:::store
+  end
+
+  op -->|"HTTPS :7328"| core
+  win -->|"mTLS :7326"| hub
+  hub -->|"local pipe"| core
+  ot -. "SNMP / syslog" .-> coll
+  dh -. "issue + bind cert" .-> ot
+  core --> dh
+  hub --> store
+  coll --> store
+  core --> store
+
+  classDef ext fill:#0e1420,stroke:#5e6b7d,color:#98a4b3;
+  classDef core fill:#122a4a,stroke:#38bdf8,stroke-width:2px,color:#f4f7fb;
+  classDef gw fill:#121826,stroke:#34d3c1,color:#f4f7fb;
+  classDef store fill:#121826,stroke:#8b8cf6,color:#f4f7fb;
+```
+
+*Operators reach one console; endpoints and devices are onboarded through the two lanes below. The riskier surfaces — the agent hub and the vendor driver host — are isolated and hold no CA key; only the trusted core signs.*
+
 ## The core idea: an enclave gets a root of trust
 
 Most isolated networks have the same problem: the cameras, intercoms, and controllers on them **can't domain-join or enroll themselves**, there's often no real directory or IT team on site, and yet the network still has to meet requirements like NIST 800-171. Devices ship with self-signed certs and default passwords, and nobody owns the identity of anything.

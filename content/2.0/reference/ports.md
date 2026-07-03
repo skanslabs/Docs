@@ -12,6 +12,41 @@ Direction is stated from the appliance's point of view. The Windows agent, for e
 
 Two tiers below separate what the Skans spec pins down from what follows each protocol's well-known default. Treat the first table as authoritative and the second as "confirm against your installer config."
 
+## The communication map
+
+```mermaid
+flowchart LR
+  op["Operator<br/>browser"]:::ext
+  ag["Windows<br/>agents"]:::ext
+  ed["Edges<br/>(other sites)"]:::ext
+  dv["Cameras · IoT · OT"]:::ext
+
+  subgraph app["Skans appliance"]
+    direction TB
+    cp["ControlPlane<br/>console"]:::core
+    ah["Agent Hub"]:::gw
+    ew["Edge Wire"]:::gw
+    co["Collector"]:::gw
+    ls[("OpenSearch · Vault · SQL<br/>loopback only")]:::store
+  end
+
+  op -->|"HTTPS :7328"| cp
+  ag -->|"mTLS :7326"| ah
+  ed -->|"mTLS :7327"| ew
+  dv -. "syslog :514 · SNMP :161/162" .-> co
+  ah --> ls
+  ew --> ls
+  co --> ls
+  cp --> ls
+
+  classDef ext fill:#0e1420,stroke:#5e6b7d,color:#98a4b3;
+  classDef core fill:#122a4a,stroke:#38bdf8,stroke-width:2px,color:#f4f7fb;
+  classDef gw fill:#121826,stroke:#34d3c1,color:#f4f7fb;
+  classDef store fill:#121826,stroke:#8b8cf6,color:#f4f7fb;
+```
+
+*Only three ports face the network — the two mutual-TLS gateways (`7326` agents, `7327` edges) and the HTTPS console (`7328`). The stores are loopback-only; the device lane is UDP.*
+
 ## Documented in the Skans spec
 
 These ports are named explicitly in the Skans service and architecture docs. They are what you plan firewall rules around for a single self-contained appliance.

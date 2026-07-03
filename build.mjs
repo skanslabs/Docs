@@ -120,10 +120,46 @@ const CLIENT_JS = String.raw`(function(){
 const CSS_VER = crypto.createHash("sha1").update(fs.readFileSync(path.join(ROOT, "src/docs.css"))).digest("hex").slice(0, 8);
 const JS_VER = crypto.createHash("sha1").update(CLIENT_JS).digest("hex").slice(0, 8);
 
+// Mermaid diagram renderer — loaded ONLY on pages that contain a ```mermaid block. Brand-themed
+// (THE SEAM palette) and re-renders on the light/dark toggle. Diagrams use classDef accents (see the
+// .md sources) for the azure/teal/violet emphasis; these vars set the default node/line/text look.
+const MERMAID_SCRIPT = String.raw`<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const P = {
+  light: { bg:'transparent', node:'#eef3f8', border:'#16233f', line:'#5e6b7d', text:'#0a0d12', el:'#eef3f8' },
+  dark:  { bg:'transparent', node:'#121826', border:'#2a3a57', line:'#8b97a7', text:'#f4f7fb', el:'#0e1420' },
+};
+const els = [...document.querySelectorAll('pre.mermaid')];
+els.forEach(function(e){ e.dataset.src = e.textContent; });
+function vars(){
+  var c = document.documentElement.getAttribute('data-theme')==='light' ? P.light : P.dark;
+  return {
+    background:c.bg, mainBkg:c.node, primaryColor:c.node, secondaryColor:c.node, tertiaryColor:c.node,
+    primaryBorderColor:c.border, nodeBorder:c.border, clusterBkg:'rgba(139,151,167,0.05)', clusterBorder:c.border,
+    lineColor:c.line, primaryTextColor:c.text, textColor:c.text, titleColor:c.text, nodeTextColor:c.text,
+    edgeLabelBackground:c.el, labelBackground:c.el,
+    actorBkg:c.node, actorBorder:'#38bdf8', actorTextColor:c.text, actorLineColor:c.line,
+    signalColor:c.line, signalTextColor:c.text, sequenceNumberColor:c.text,
+    labelBoxBkgColor:c.node, labelBoxBorderColor:c.border, labelTextColor:c.text,
+    noteBkgColor:c.node, noteBorderColor:'#34d3c1', noteTextColor:c.text,
+    fontFamily:'Inter, ui-sans-serif, system-ui, sans-serif', fontSize:'14px',
+  };
+}
+async function render(){
+  mermaid.initialize({ startOnLoad:false, securityLevel:'strict', theme:'base', themeVariables:vars(),
+    flowchart:{ curve:'basis', htmlLabels:true, padding:16, nodeSpacing:52, rankSpacing:58 }, sequence:{ useMaxWidth:true, mirrorActors:false } });
+  els.forEach(function(e){ e.removeAttribute('data-processed'); e.innerHTML=''; e.textContent = e.dataset.src; });
+  try { await mermaid.run({ nodes: els }); } catch(err){ console.warn('mermaid', err); }
+}
+render();
+new MutationObserver(function(m){ for (var i=0;i<m.length;i++) if (m[i].attributeName==='data-theme'){ render(); break; } }).observe(document.documentElement, { attributes:true });
+</script>`;
+
 /* ---------- markdown-it ---------- */
 const md = new MarkdownIt({
   html: true, linkify: true, typographer: true,
   highlight(code, lang) {
+    if (lang === "mermaid") return `<figure class="mermaid-figure"><pre class="mermaid">${md.utils.escapeHtml(code)}</pre></figure>`;
     let out;
     try { out = lang && hljs.getLanguage(lang) ? hljs.highlight(code, { language: lang }).value : hljs.highlightAuto(code).value; }
     catch { out = md.utils.escapeHtml(code); }
@@ -203,7 +239,11 @@ const SPRITE = `<svg width="0" height="0" style="position:absolute" aria-hidden=
 </svg>`;
 
 const OG_IMAGE = `${SITE_URL}/og.png`;
-const HEAD = (title, desc, { kind = "Docs", url = "" } = {}) => {
+const LOGO = `${SITE_URL}/apple-touch-icon.png`;
+const ORG = { "@type": "Organization", "@id": `${SITE_URL}/#org`, name: "Skans Labs", url: `${SITE_URL}/`, logo: LOGO };
+const ldGraph = (nodes) => JSON.stringify({ "@context": "https://schema.org", "@graph": nodes }).replace(/</g, "\\u003c");
+const crumbLd = (items) => ({ "@type": "BreadcrumbList", itemListElement: items.map((it, i) => ({ "@type": "ListItem", position: i + 1, name: it.name, item: it.url })) });
+const HEAD = (title, desc, { kind = "Docs", url = "", jsonld = "" } = {}) => {
   const d = md.utils.escapeHtml(desc || "");
   const t = md.utils.escapeHtml(title);
   const site = `${PRODUCT} ${kind}`;
@@ -227,7 +267,7 @@ ${url ? `<meta property="og:url" content="${url}">` : ""}
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/fonts/space-grotesk-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css?v=${CSS_VER}">
+<link rel="stylesheet" href="/styles.css?v=${CSS_VER}">${jsonld ? `\n<script type="application/ld+json">${jsonld}</script>` : ""}
 </head><body>`;
 };
 
@@ -293,6 +333,7 @@ fs.rmSync(DIST_BLOG, { recursive: true, force: true });
 fs.mkdirSync(DIST_BLOG, { recursive: true });
 const searchIndex = [];
 const docsUrls = [];
+const llmsPages = [];
 
 for (const v of versions.versions) {
   const verDir = path.join(CONTENT, v.id);
@@ -315,11 +356,19 @@ for (const v of versions.versions) {
 
     const canonical = `${DOCS_URL}/${v.id}/${item.slug}/`;
     docsUrls.push(canonical);
-    const html = HEAD(title, fm.description, { url: canonical }) + SPRITE + topbar({ active: "docs", ver: versionMenu(v.id, item.slug), side: true, blogHref: `${BLOG_URL}/` })
+    llmsPages.push({ group: item.group, title, url: canonical, desc: fm.description || "" });
+    const ld = ldGraph([ORG,
+      { "@type": "TechArticle", headline: title, description: fm.description || "", url: canonical, inLanguage: "en",
+        isPartOf: { "@type": "WebSite", name: `${PRODUCT} Docs`, url: `${DOCS_URL}/` },
+        author: { "@id": `${SITE_URL}/#org` }, publisher: { "@id": `${SITE_URL}/#org` }, image: OG_IMAGE },
+      crumbLd([{ name: "Docs", url: `${DOCS_URL}/` }, { name: title, url: canonical }])]);
+    let html = HEAD(title, fm.description, { url: canonical, jsonld: ld }) + SPRITE + topbar({ active: "docs", ver: versionMenu(v.id, item.slug), side: true, blogHref: `${BLOG_URL}/` })
       + `<div class="shell">` + sidebar(nav, v.id, item.slug)
       + `<main class="content"><article class="prose">${crumbs}${eyebrow}<h1>${title}</h1>${bodyHtml}${pn}</article></main>`
       + tocHtml(toc)
       + `</div><div class="scrim" id="scrim"></div>` + footer() + `<script src="/docs.js?v=${JS_VER}" defer></script></body></html>`;
+
+    if (html.includes('class="mermaid"')) html = html.replace("</body></html>", MERMAID_SCRIPT + "</body></html>");
 
     const outDir = path.join(DIST, v.id, item.slug);
     fs.mkdirSync(outDir, { recursive: true });
@@ -360,13 +409,21 @@ if (posts.length) {
     const cover = p.fm.cover ? `<img src="${p.fm.cover}" alt="">` : "";
     return `<a class="post-card" data-cat="${slugify(cat)}" href="/${p.slug}/"><div class="post-cover">${cover}<span class="post-cat ${catClass(cat)}">${cat}</span></div><div class="post-body"><div class="post-meta">${fmtDate(p.fm.date)}${p.fm.author?` · ${md.utils.escapeHtml(p.fm.author)}`:""}</div><h3>${md.utils.escapeHtml(p.fm.title||p.slug)}</h3><p>${md.utils.escapeHtml(p.fm.excerpt||"")}</p><span class="post-more">Read post ${ARROW}</span></div></a>`;
   }).join("");
-  const indexHtml = HEAD("Announcements & how-tos", "Announcements and how-tos from Skans Labs.", { kind: "Blog", url: `${BLOG_URL}/` }) + SPRITE + topbar(blogBar)
+  const blogLd = ldGraph([ORG, { "@type": "Blog", name: "Skans Labs Blog", url: `${BLOG_URL}/`, description: "Product announcements, release notes, and hands-on how-tos.", publisher: { "@id": `${SITE_URL}/#org` } }]);
+  const indexHtml = HEAD("Announcements & how-tos", "Announcements and how-tos from Skans Labs.", { kind: "Blog", url: `${BLOG_URL}/`, jsonld: blogLd }) + SPRITE + topbar(blogBar)
     + `<main class="blog-wrap"><div class="blog-hero"><span class="blog-eyebrow">Skans Labs</span><h1>Blog</h1><p>Product announcements, release notes, and hands-on how-tos.</p></div><div class="blog-filters">${chips}</div><div class="blog-grid" id="blogGrid">${cards}</div></main>` + footer() + `<script src="/docs.js?v=${JS_VER}" defer></script></body></html>`;
   fs.writeFileSync(path.join(DIST_BLOG, "index.html"), indexHtml);
   posts.forEach((p)=>{
     const cat = p.fm.category || "Post";
     const cover = p.fm.cover ? `<div class="post-hero-cover"><img src="${p.fm.cover}" alt=""></div>` : `<div class="post-hero-cover"></div>`;
-    const html = HEAD(p.fm.title||p.slug, p.fm.excerpt, { kind: "Blog", url: `${BLOG_URL}/${p.slug}/` }) + SPRITE + topbar(blogBar)
+    const postUrl = `${BLOG_URL}/${p.slug}/`;
+    const dateISO = /^\d{4}-\d{2}-\d{2}/.test(String(p.fm.date || "")) ? String(p.fm.date).slice(0, 10) : undefined;
+    const postLd = ldGraph([ORG,
+      { "@type": "Article", headline: p.fm.title || p.slug, description: p.fm.excerpt || "", url: postUrl, inLanguage: "en",
+        datePublished: dateISO, author: p.fm.author ? { "@type": "Organization", name: p.fm.author } : { "@id": `${SITE_URL}/#org` },
+        publisher: { "@id": `${SITE_URL}/#org` }, image: p.fm.cover ? `${BLOG_URL}${p.fm.cover}` : OG_IMAGE },
+      crumbLd([{ name: "Blog", url: `${BLOG_URL}/` }, { name: p.fm.title || p.slug, url: postUrl }])]);
+    const html = HEAD(p.fm.title || p.slug, p.fm.excerpt, { kind: "Blog", url: postUrl, jsonld: postLd }) + SPRITE + topbar(blogBar)
       + `<article class="post-article"><a class="post-back" href="/">← All posts</a>${cover}<div class="post-head"><span class="post-cat ${catClass(cat)}">${cat}</span><h1>${md.utils.escapeHtml(p.fm.title||p.slug)}</h1><div class="post-byline">${p.fm.author?`<b>${md.utils.escapeHtml(p.fm.author)}</b><span class="dot"></span>`:""}${fmtDate(p.fm.date)}</div></div><div class="prose">${linkToDocs(md.render(p.content))}</div></article>` + footer() + `<script src="/docs.js?v=${JS_VER}" defer></script></body></html>`;
     fs.mkdirSync(path.join(DIST_BLOG, p.slug), { recursive: true });
     fs.writeFileSync(path.join(DIST_BLOG, p.slug, "index.html"), html);
@@ -396,6 +453,20 @@ fs.writeFileSync(path.join(DIST, "search-index.json"), JSON.stringify(searchInde
 fs.writeFileSync(path.join(DIST, "404.html"), errorPage("Docs", { active: "docs", blogHref: `${BLOG_URL}/` }));
 fs.writeFileSync(path.join(DIST, "sitemap.xml"), sitemapXml([`${DOCS_URL}/`, ...docsUrls]));
 fs.writeFileSync(path.join(DIST, "robots.txt"), robotsTxt(DOCS_URL));
+
+// llms.txt — a curated index for AI crawlers (llmstxt.org)
+const LLMS_INTRO = "Skans is an on-premises security appliance that becomes the root of trust for isolated camera, IoT, OT, and building-automation networks. It gives every device its own certificate identity and adds access control (802.1X), patching, backup, monitoring, vulnerability management, and NIST 800-171 / CMMC compliance evidence — set up by the technician who installs the equipment, with nothing leaving the local network.";
+let llms = `# Skans Labs\n\n> ${LLMS_INTRO}\n\nProduct site: ${SITE_URL}/  ·  Documentation: ${DOCS_URL}/  ·  Blog: ${BLOG_URL}/\n\n## Documentation\n`;
+let llmsGroup = "";
+for (const p of llmsPages) {
+  if (p.group !== llmsGroup) { llms += `\n### ${p.group}\n`; llmsGroup = p.group; }
+  llms += `- [${p.title}](${p.url})${p.desc ? `: ${p.desc}` : ""}\n`;
+}
+if (posts.length) {
+  llms += `\n## Blog\n`;
+  for (const p of posts) llms += `- [${p.fm.title || p.slug}](${BLOG_URL}/${p.slug}/)${p.fm.excerpt ? `: ${p.fm.excerpt}` : ""}\n`;
+}
+fs.writeFileSync(path.join(DIST, "llms.txt"), llms);
 
 /* assets */
 fs.mkdirSync(path.join(DIST, "fonts"), { recursive: true });

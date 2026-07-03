@@ -50,6 +50,31 @@ By design, a pending agent **receives no commands until you approve it**. On app
 Approval is **manual by default**. An optional setting (`agent.autoApproveAdJoined`) can auto-approve, but it's **off by default and fail-closed** — even when on, it requires *both* a client certificate that chains to the Skans root *and* an enrolling hostname that matches a known, enabled directory computer.
 :::
 
+## How the agent talks to the appliance
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor Op as Operator
+  participant A as Windows Agent
+  participant H as Agent Hub :7326
+  participant C as Trusted Core
+  A->>H: enroll (client cert, mutual TLS)
+  H->>C: relay over local pipe
+  C-->>A: pending — awaiting approval
+  Op->>C: approve the device
+  loop every ~45s
+    A->>H: check in
+    H->>C: relay (hub holds no key)
+    C-->>A: signed command set
+    Note over A: verify signature, then execute
+    A->>H: report results + telemetry
+    H->>C: relay to monitoring store
+  end
+```
+
+*The agent only ever dials **out** to the hub on `7326`; it has no inbound listener. The hub is a low-privilege relay that holds no signing key — every command the agent runs is signed by the trusted core.*
+
 ## What an approved agent does
 
 Once approved, the agent delivers the full Windows management set:

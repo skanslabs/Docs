@@ -298,3 +298,14 @@
 .err-wrap p{color:var(--ink-mut);}
 .err-btn{display:inline-flex;align-items:center;gap:7px;margin-top:24px;color:var(--accent);font-weight:600;font-size:0.9rem;}
 .err-btn:hover{color:var(--ink);}
+
+/* ---------- Mermaid diagrams ---------- */
+.mermaid-figure{margin:30px 0;padding:22px 10px;overflow-x:auto;text-align:center;background:rgba(136,150,170,0.05);border:1px solid var(--line);border-radius:14px;}
+.mermaid-figure .edgeLabel,.mermaid-figure .edgeLabel p{background:var(--code-bg)!important;}
+.mermaid-figure pre.mermaid{background:none;border:0;margin:0;padding:0;font-family:var(--font-mono);line-height:1.5;visibility:hidden;}
+.mermaid-figure pre.mermaid[data-processed]{visibility:visible;}
+.mermaid-figure svg{max-width:100%;height:auto;display:inline-block;}
+.mermaid-figure .edgeLabel,.mermaid-figure .edgeLabel p{background:var(--surface2)!important;color:var(--ink)!important;font-size:0.82rem;}
+.mermaid-figure .nodeLabel,.mermaid-figure text{font-family:Inter,ui-sans-serif,system-ui,sans-serif;}
+.mermaid-figure .cluster-label .nodeLabel{font-weight:600;letter-spacing:0.02em;}
+.mmcap{display:block;margin:-18px 0 30px;text-align:center;color:var(--ink-mut);font-size:0.82rem;}

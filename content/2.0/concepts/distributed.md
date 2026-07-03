@@ -21,24 +21,27 @@ By design there are **only two tiers**. A third, CAS-style middle tier is treate
 
 ## The shape: one Core, many Edges
 
-```text
-                        ┌──────────────────────────────┐
-                        │          SKANS CORE          │   Site A (HQ)
-                        │  system of record · console  │
-                        │   CA · AD DS · NPS · data    │
-                        └───────────────┬──────────────┘
-                                        │  mTLS REST :7327
-                  ┌─────────────────────┼─────────────────────┐
-                  │                     │                     │
-           ┌──────┴──────┐       ┌──────┴──────┐       ┌──────┴──────┐
-           │  Skans Edge │       │  Skans Edge │       │  Skans Edge │
-           │  collector  │       │  collector  │       │  collector  │
-           │  agent-hub  │       │  agent-hub  │       │  agent-hub  │
-           │ cache · S&F │       │ cache · S&F │       │ cache · S&F │
-           └──────┬──────┘       └──────┬──────┘       └──────┬──────┘
-            agents :7326          agents :7326          agents :7326
-            + agentless           + agentless           + agentless
-               Site B                Site C                Site D
+```mermaid
+flowchart TB
+  subgraph coreZone["Skans Core — Site A (HQ)"]
+    c["System of record · console<br/>CA · AD DS · NPS · data store"]:::core
+  end
+  subgraph siteB["Site B"]
+    lb["local agents :7326<br/>+ agentless devices"]:::ext
+    eb["Skans Edge<br/>collector · agent-hub<br/>cache · store-and-forward"]:::gw
+    lb --> eb
+  end
+  subgraph siteC["Site C"]
+    lc["local agents :7326<br/>+ agentless devices"]:::ext
+    ec["Skans Edge<br/>collector · agent-hub<br/>cache · store-and-forward"]:::gw
+    lc --> ec
+  end
+  eb -->|"mTLS :7327 · Edge dials out"| c
+  ec -->|"mTLS :7327 · Edge dials out"| c
+
+  classDef core fill:#122a4a,stroke:#38bdf8,stroke-width:2px,color:#f4f7fb;
+  classDef gw fill:#121826,stroke:#34d3c1,color:#f4f7fb;
+  classDef ext fill:#0e1420,stroke:#5e6b7d,color:#98a4b3;
 ```
 
 The **only** link that crosses the WAN is the Edge-to-Core channel on **`:7327`**, and the **Edge is the pull client** — it dials *out* to the Core. The Core never initiates an inbound connection, which keeps the design NAT- and firewall-friendly: a site only needs outbound reach to the Core. Local devices and agents stay on-site, talking to their Edge on `:7326`.
