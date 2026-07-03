@@ -88,8 +88,8 @@ Honest status: the push path has been validated with a pre-flight (no upload) an
 
 | Service | Port | Transport |
 | --- | --- | --- |
-| Console (Blazor) | 5099 | HTTPS |
-| Agent hub (`SkansAgentHub`) | 5443 | mTLS REST |
+| Console (Blazor) | 7328 | HTTPS |
+| Agent hub (`SkansAgentHub`) | 7326 | mTLS REST |
 
 See **[Ports & protocols](/2.0/reference/ports/)** for the full list.
 

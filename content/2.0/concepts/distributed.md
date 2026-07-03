@@ -27,7 +27,7 @@ By design there are **only two tiers**. A third, CAS-style middle tier is treate
                         │  system of record · console  │
                         │   CA · AD DS · NPS · data    │
                         └───────────────┬──────────────┘
-                                        │  mTLS REST :5444
+                                        │  mTLS REST :7327
                   ┌─────────────────────┼─────────────────────┐
                   │                     │                     │
            ┌──────┴──────┐       ┌──────┴──────┐       ┌──────┴──────┐
@@ -36,12 +36,12 @@ By design there are **only two tiers**. A third, CAS-style middle tier is treate
            │  agent-hub  │       │  agent-hub  │       │  agent-hub  │
            │ cache · S&F │       │ cache · S&F │       │ cache · S&F │
            └──────┬──────┘       └──────┬──────┘       └──────┬──────┘
-            agents :5443          agents :5443          agents :5443
+            agents :7326          agents :7326          agents :7326
             + agentless           + agentless           + agentless
                Site B                Site C                Site D
 ```
 
-The **only** link that crosses the WAN is the Edge-to-Core channel on **`:5444`**, and the **Edge is the pull client** — it dials *out* to the Core. The Core never initiates an inbound connection, which keeps the design NAT- and firewall-friendly: a site only needs outbound reach to the Core. Local devices and agents stay on-site, talking to their Edge on `:5443`.
+The **only** link that crosses the WAN is the Edge-to-Core channel on **`:7327`**, and the **Edge is the pull client** — it dials *out* to the Core. The Core never initiates an inbound connection, which keeps the design NAT- and firewall-friendly: a site only needs outbound reach to the Core. Local devices and agents stay on-site, talking to their Edge on `:7326`.
 
 ## The Core: brain and system of record
 
@@ -113,8 +113,8 @@ All verification to date is a **two-box lab** — one Edge and one Core on the b
 
 | Port | Link | Notes |
 | --- | --- | --- |
-| `:5444` | Edge ↔ Core, mTLS REST | The only link that crosses the WAN; the Edge dials out |
-| `:5443` | Agents ↔ their Edge (or the Core), mTLS REST | Local to each site |
+| `:7327` | Edge ↔ Core, mTLS REST | The only link that crosses the WAN; the Edge dials out |
+| `:7326` | Agents ↔ their Edge (or the Core), mTLS REST | Local to each site |
 | `:9200` | OpenSearch | Loopback only, single-node — never clustered |
 
 See the **[Ports reference](/2.0/reference/ports/)** for the full list. The design maps to NIST controls including **SC-7** (boundary protection), **CP-10** (recoverable store-and-forward), **SI-4 / AU-6** (monitoring and correlation at the Edge), **AU-9** (audit protection), **IA-5 / SC-12** (identity and key management), **CM-2 / CM-6** (central configuration), and **SR-3 / SR-4** (supply-chain integrity of distributed content).

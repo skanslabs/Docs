@@ -81,8 +81,8 @@ Common listeners:
 | --- | --- |
 | Syslog | 514 |
 | SNMP traps | 162 |
-| Agent hub (mTLS REST) | 5443 |
-| Console (HTTPS) | 5099 |
+| Agent hub (mTLS REST) | 7326 |
+| Console (HTTPS) | 7328 |
 
 The full list is in **[Ports & protocols](/2.0/reference/ports/)**.
 

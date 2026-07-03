@@ -54,7 +54,7 @@ For Windows machines joined to the enclave directory (`skans.lan`, NetBIOS `SKAN
 This is proven end to end: domain member **SKANS-CLIENT1** auto-installed `Skans Root CA` over GPO with no manual action and then validated a camera's TLS certificate **with no trust warning** — the whole point of pushing the chain to clients.
 
 ::: note
-The **Windows agent** gets its mTLS identity from the same CA. Agent transport is **mutual-TLS REST on port 5443**; the ControlPlane signs agent check-ins from AD CS. See **[Install the agent](/2.0/how-tos/install-the-agent/)** and **[Ports](/2.0/reference/ports/)**.
+The **Windows agent** gets its mTLS identity from the same CA. Agent transport is **mutual-TLS REST on port 7326**; the ControlPlane signs agent check-ins from AD CS. See **[Install the agent](/2.0/how-tos/install-the-agent/)** and **[Ports](/2.0/reference/ports/)**.
 :::
 
 ### 2. SCEP-capable device — self-enroll through NDES

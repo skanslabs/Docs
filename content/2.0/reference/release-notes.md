@@ -14,10 +14,10 @@ This is the current-release summary for **Skans 2.0** — the first shipping rel
 
 The flagship is a **single self-contained Windows Server appliance** (an open-source Linux SKU is the secondary flavor), sized for one site of **up to ~5,000 devices** (SRS PERF-01). Everything runs on the enclave — no runtime internet dependency.
 
-- **Runtime:** .NET 10; an ASP.NET Core + Blazor console bound on **:5099** (HTTPS).
+- **Runtime:** .NET 10; an ASP.NET Core + Blazor console bound on **:7328** (HTTPS).
 - **Stores:** SQL Server / SQL Express holds control-plane state; OpenSearch holds telemetry, metrics, events, inventory, and vulnerabilities. Volume lives in OpenSearch, which is why the relational DB stays tiny.
 - **Run model:** always-on, supervised Windows services — `SkansControlPlane`, `SkansAgentHub`, `SkansCollector`, `SkansAgent`, `SkansScheduler` — that start at boot and restart on failure, not scheduled scripts.
-- **Agent transport:** mutual-TLS REST on **:5443**. The agent hub holds no signing key; the trusted core signs commands over a local pipe.
+- **Agent transport:** mutual-TLS REST on **:7326**. The agent hub holds no signing key; the trusted core signs commands over a local pipe.
 
 See **[Ports & endpoints](/2.0/reference/ports/)** for the full list.
 

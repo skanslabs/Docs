@@ -40,9 +40,9 @@ Self-health raises an alert for the "killers" that quietly take the box down: di
 
 ## The console won't load
 
-**Likely cause** — the console is served by the **SkansCP** (Skans Control Plane) Windows service on **port 5099 (HTTPS)**. If the page won't open, that service is stopped or restarting.
+**Likely cause** — the console is served by the **SkansCP** (Skans Control Plane) Windows service on **port 7328 (HTTPS)**. If the page won't open, that service is stopped or restarting.
 
-**Fix** — open **services.msc** and confirm **SkansCP** is *Running*. Every Skans service is set to **Automatic** with restart-on-failure, so a transient crash self-recovers; if it stays down, **grab the Support Bundle** (it runs without the app) and send it. Reaching the box on 5099 but nothing else? Check the [ports reference](/2.0/reference/ports/).
+**Fix** — open **services.msc** and confirm **SkansCP** is *Running*. Every Skans service is set to **Automatic** with restart-on-failure, so a transient crash self-recovers; if it stays down, **grab the Support Bundle** (it runs without the app) and send it. Reaching the box on 7328 but nothing else? Check the [ports reference](/2.0/reference/ports/).
 
 ## The setup wizard rebooted and seems stuck
 
@@ -130,8 +130,8 @@ There is **no shipped double-click MSI installer** for the Windows agent. It's d
 
 | Service | Role | Port |
 | --- | --- | --- |
-| **SkansCP** | Console + control plane | 5099 (HTTPS) |
-| **SkansAgentHub** | Agent gateway (mTLS) | 5443 |
+| **SkansCP** | Console + control plane | 7328 (HTTPS) |
+| **SkansAgentHub** | Agent gateway (mTLS) | 7326 |
 | **SkansCollector** | SNMP/syslog, ICS collect, alert engine | — |
 | **SkansOpenSearch** | Data store | — |
 | **SkansVault** | Secrets store | — |

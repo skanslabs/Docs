@@ -18,14 +18,18 @@ These ports are named explicitly in the Skans service and architecture docs. The
 
 | Service | Port | Protocol | Direction (vs. appliance) | Purpose | Owning service |
 | --- | --- | --- | --- | --- | --- |
-| Console / control plane | **5099** | TCP / HTTPS | Inbound (operator browser → appliance) | Blazor-Server console + REST; also reverse-proxies the embedded search dashboards | `SkansCP` |
-| Agent hub | **5443** | TCP / mTLS | Inbound (endpoint agents → appliance) | Windows-agent telemetry + command channel, authenticated with a per-agent AD CS certificate | `SkansAgentHub` |
+| Console / control plane | **7328** | TCP / HTTPS | Inbound (operator browser → appliance) | Blazor-Server console + REST; also reverse-proxies the embedded search dashboards | `SkansCP` |
+| Agent hub | **7326** | TCP / mTLS | Inbound (endpoint agents → appliance) | Windows-agent telemetry + command channel, authenticated with a per-agent AD CS certificate | `SkansAgentHub` |
 | Syslog | **514** | UDP | Inbound (devices → appliance) | Agentless log ingest from IoT / OT / network gear | `SkansCollector` |
 | SNMP trap | **162** | UDP | Inbound (devices → appliance) | Agentless trap ingest from devices | `SkansCollector` |
 | Internal core API | *loopback* | mTLS over named pipe / loopback | On-box only | Least-privileged workers ↔ the trusted core; no TCP port is exposed | core |
 
 ::: note
-The agent transport on **5443** is **mTLS REST**, not gRPC, and the agent stores nothing in SQLite — telemetry streams to the appliance. Control-plane state lives in SQL Server (SQL Express); telemetry and logs live in the on-box search store.
+Skans binds its own services in one reserved, adjacent block — **7326** agent hub, **7327** Edge↔Core, **7328** console — chosen off collision-prone defaults and adjacent so a single firewall rule (`allow 7326-7328`) covers the appliance. This is confirmed live on the flagship appliance, not just spec-quoted. These moved from the earlier **5443 / 5444 / 5099**; if a firewall rule or bookmark still points at an old port, update it to the new one.
+:::
+
+::: note
+The agent transport on **7326** is **mTLS REST**, not gRPC, and the agent stores nothing in SQLite — telemetry streams to the appliance. Control-plane state lives in SQL Server (SQL Express); telemetry and logs live in the on-box search store.
 :::
 
 ## Standard defaults (not enumerated in the Skans spec)
@@ -49,21 +53,21 @@ The numbers in this second table are protocol defaults, **not values pinned by t
 
 The split between the agent lane and the agentless lane is an architectural invariant, and it maps directly onto the ports above:
 
-- **Agent-managed (Windows endpoints)** push over the **5443** mTLS hub. Windows event collection rides this lane end to end.
+- **Agent-managed (Windows endpoints)** push over the **7326** mTLS hub. Windows event collection rides this lane end to end.
 - **Agentless (IoT / OT / network devices)** flow through the `SkansCollector` lanes — **syslog 514**, **SNMP trap 162**, and outbound **SNMP poll**.
 
 Windows endpoints are never SNMP-polled; SNMP is only ever used for IoT / OT and network gear. See **[Install & approve the Windows agent](/2.0/how-tos/install-the-agent/)** and **[Enroll a device](/2.0/how-tos/enroll-a-device/)** for the two paths.
 
 ## Loopback and never-exposed services
 
-The on-box search store and its dashboards are **loopback-only by design**. The browser never talks to OpenSearch directly — the console on **5099** reverse-proxies the dashboards, so **5099** is the only web port an operator's browser ever reaches. The internal core API between the low-privilege workers and the trusted core likewise rides a named pipe / loopback mTLS channel with no TCP port.
+The on-box search store and its dashboards are **loopback-only by design**. The browser never talks to OpenSearch directly — the console on **7328** reverse-proxies the dashboards, so **7328** is the only web port an operator's browser ever reaches. The internal core API between the low-privilege workers and the trusted core likewise rides a named pipe / loopback mTLS channel with no TCP port.
 
 ::: note
-**Retired:** the old WEF → WEC → Fluent Bit Windows-event log-shipper is gone. There is no separate log-shipper port — Windows events now flow over the agent's **5443** lane into the on-box search store.
+**Retired:** the old WEF → WEC → Fluent Bit Windows-event log-shipper is gone. There is no separate log-shipper port — Windows events now flow over the agent's **7326** lane into the on-box search store.
 :::
 
 ## Next
 
 - **[Requirements](/2.0/getting-started/requirements/)** — the network and platform a site needs before install
-- **[Install & approve the Windows agent](/2.0/how-tos/install-the-agent/)** — the 5443 agent lane
+- **[Install & approve the Windows agent](/2.0/how-tos/install-the-agent/)** — the 7326 agent lane
 - **[Troubleshooting](/2.0/reference/troubleshooting/)** — when a service or listener isn't reachable
