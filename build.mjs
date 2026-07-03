@@ -15,6 +15,7 @@ const DIST_BLOG = path.join(ROOT, "dist-blog");
 const SITE_FONTS = path.join(ROOT, "assets/fonts");
 const FAVICON = path.join(ROOT, "assets/favicon.svg");
 // The docs and blog are served on separate hostnames; cross-links go absolute.
+const SITE_URL = "https://skanslabs.com";
 const DOCS_URL = "https://docs.skanslabs.com";
 const BLOG_URL = "https://blog.skanslabs.com";
 
@@ -222,7 +223,7 @@ function versionMenu(curVer, slug) {
   return `<details class="verswitch"><summary>v${curVer}${cur?.latest ? "" : ""}<svg class="caret" viewBox="0 0 24 24"><use href="#ic-caret"/></svg></summary><div class="verswitch-menu">${rows}</div></details>`;
 }
 
-function topbar({ active = "docs", ver = "", side = false, search = true, brandHref = "/", docsHref = "/", blogHref = "/blog/" } = {}) {
+function topbar({ active = "docs", ver = "", side = false, search = true, brandHref = `${SITE_URL}/`, docsHref = "/", blogHref = "/blog/" } = {}) {
   return `<header class="dh"><div class="dh-inner">
 ${side ? `<button class="icon-btn side-toggle" id="sideToggle" aria-label="Open navigation"><svg viewBox="0 0 24 24"><use href="#ic-menu"/></svg></button>` : ""}
 <a class="dh-brand" href="${brandHref}"><svg class="brand-mark" viewBox="0 0 48 56"><use href="#m-shield"/></svg><span class="dh-word">SK<svg class="peak" viewBox="0 0 100 100"><use href="#m-peak"/></svg>NS</span></a>
@@ -315,7 +316,7 @@ if (fs.existsSync(BLOGDIR)) {
 }
 if (posts.length) {
   // The blog is its own site at blog.skanslabs.com: index at "/", posts at "/<slug>/".
-  const blogBar = { active: "blog", search: false, brandHref: "/", docsHref: `${DOCS_URL}/`, blogHref: "/" };
+  const blogBar = { active: "blog", search: false, brandHref: `${SITE_URL}/`, docsHref: `${DOCS_URL}/`, blogHref: "/" };
   // Links to docs pages inside a post body (e.g. /2.0/…) point at the docs host.
   const linkToDocs = (html) => html.replace(/href="\/(\d)/g, `href="${DOCS_URL}/$1`);
   const cats = [...new Set(posts.map((p)=>p.fm.category).filter(Boolean))];
