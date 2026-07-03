@@ -25,7 +25,7 @@ These ports are named explicitly in the Skans service and architecture docs. The
 | Internal core API | *loopback* | mTLS over named pipe / loopback | On-box only | Least-privileged workers ↔ the trusted core; no TCP port is exposed | core |
 
 ::: note
-Skans binds its own services in one reserved, adjacent block — **7326** agent hub, **7327** Edge↔Core, **7328** console — chosen off collision-prone defaults and adjacent so a single firewall rule (`allow 7326-7328`) covers the appliance. This is confirmed live on the flagship appliance, not just spec-quoted. These moved from the earlier **5443 / 5444 / 5099**; if a firewall rule or bookmark still points at an old port, update it to the new one.
+Skans binds its own services in one reserved, adjacent block — **7326** agent hub, **7327** Edge↔Core, **7328** console — chosen off collision-prone defaults and adjacent so a single firewall rule (`allow 7326-7328`) covers the appliance. This is confirmed live on the flagship appliance, not just spec-quoted. If a firewall rule or bookmark still points at a legacy port, update it to the block above.
 :::
 
 ::: note
