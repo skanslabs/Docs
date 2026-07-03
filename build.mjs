@@ -202,17 +202,34 @@ const SPRITE = `<svg width="0" height="0" style="position:absolute" aria-hidden=
 <symbol id="ic-gh" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.5 9.5 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></symbol>
 </svg>`;
 
-const HEAD = (title, desc, depthPrefix) => `<!DOCTYPE html><html lang="en" data-theme="dark"><head>
+const OG_IMAGE = `${SITE_URL}/og.png`;
+const HEAD = (title, desc, { kind = "Docs", url = "" } = {}) => {
+  const d = md.utils.escapeHtml(desc || "");
+  const t = md.utils.escapeHtml(title);
+  const site = `${PRODUCT} ${kind}`;
+  return `<!DOCTYPE html><html lang="en" data-theme="dark"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${title} · ${PRODUCT} Docs</title>
-<meta name="description" content="${md.utils.escapeHtml(desc || "")}">
+<title>${title} · ${site}</title>
+<meta name="description" content="${d}">
 <meta name="theme-color" content="#0a0d12">
+${url ? `<link rel="canonical" href="${url}">` : ""}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="${site}">
+<meta property="og:title" content="${t}">
+<meta property="og:description" content="${d}">
+${url ? `<meta property="og:url" content="${url}">` : ""}
+<meta property="og:image" content="${OG_IMAGE}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${t}">
+<meta name="twitter:description" content="${d}">
+<meta name="twitter:image" content="${OG_IMAGE}">
 <script>(function(){try{var t=localStorage.getItem('skans-theme');if(t!=='light'&&t!=='dark'){t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/fonts/space-grotesk-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/inter-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/styles.css?v=${CSS_VER}">
 </head><body>`;
+};
 
 function versionMenu(curVer, slug) {
   const rows = versions.versions.map((v) => {
@@ -236,6 +253,20 @@ ${ver}
 <button class="theme-toggle icon-btn" id="themeToggle" aria-label="Toggle theme"><svg class="ic-sun" viewBox="0 0 24 24"><use href="#ic-sun"/></svg><svg class="ic-moon" viewBox="0 0 24 24"><use href="#ic-moon"/></svg></button>
 </div></header>`;
 }
+
+function footer() {
+  return `<footer class="dfoot"><div class="dfoot-in"><span class="dfoot-c">© Skans Labs · On-prem security for isolated networks</span><nav class="dfoot-nav"><a href="${SITE_URL}/">skanslabs.com</a><a href="${DOCS_URL}/">Docs</a><a href="${BLOG_URL}/">Blog</a><a href="mailto:hello@skanslabs.com">Contact</a></nav></div></footer>`;
+}
+
+function errorPage(kind, bar) {
+  const back = kind === "Blog" ? { href: "/", label: "← Back to the blog" } : { href: "/", label: "← Back to the docs" };
+  return HEAD("Page not found", "That page could not be found.", { kind }) + SPRITE + topbar(bar)
+    + `<main class="err-wrap"><p class="err-code">404</p><h1>Page not found</h1><p>The page you’re looking for doesn’t exist or may have moved.</p><a class="err-btn" href="${back.href}">${back.label}</a></main>`
+    + footer() + `<script src="/docs.js?v=${JS_VER}" defer></script></body></html>`;
+}
+
+const sitemapXml = (urls) => `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${u}</loc></url>`).join("\n")}\n</urlset>\n`;
+const robotsTxt = (host) => `User-agent: *\nAllow: /\n\nSitemap: ${host}/sitemap.xml\n`;
 
 function sidebar(nav, curVer, activeSlug) {
   const groups = nav.map((g) => {
@@ -261,6 +292,7 @@ fs.mkdirSync(DIST, { recursive: true });
 fs.rmSync(DIST_BLOG, { recursive: true, force: true });
 fs.mkdirSync(DIST_BLOG, { recursive: true });
 const searchIndex = [];
+const docsUrls = [];
 
 for (const v of versions.versions) {
   const verDir = path.join(CONTENT, v.id);
@@ -281,11 +313,13 @@ for (const v of versions.versions) {
     const eyebrow = fm.eyebrow ? `<span class="doc-eyebrow">${fm.eyebrow}</span>` : "";
     const pn = `<nav class="prevnext">${prev ? `<a class="pn prev" href="/${v.id}/${prev.slug}/"><span class="pn-dir">← Previous</span><span class="pn-title">${prev.title}</span></a>` : "<span></span>"}${next ? `<a class="pn next" href="/${v.id}/${next.slug}/"><span class="pn-dir">Next →</span><span class="pn-title">${next.title}</span></a>` : "<span></span>"}</nav>`;
 
-    const html = HEAD(title, fm.description) + SPRITE + topbar({ active: "docs", ver: versionMenu(v.id, item.slug), side: true, blogHref: `${BLOG_URL}/` })
+    const canonical = `${DOCS_URL}/${v.id}/${item.slug}/`;
+    docsUrls.push(canonical);
+    const html = HEAD(title, fm.description, { url: canonical }) + SPRITE + topbar({ active: "docs", ver: versionMenu(v.id, item.slug), side: true, blogHref: `${BLOG_URL}/` })
       + `<div class="shell">` + sidebar(nav, v.id, item.slug)
       + `<main class="content"><article class="prose">${crumbs}${eyebrow}<h1>${title}</h1>${bodyHtml}${pn}</article></main>`
       + tocHtml(toc)
-      + `</div><div class="scrim" id="scrim"></div><script src="/docs.js?v=${JS_VER}" defer></script></body></html>`;
+      + `</div><div class="scrim" id="scrim"></div>` + footer() + `<script src="/docs.js?v=${JS_VER}" defer></script></body></html>`;
 
     const outDir = path.join(DIST, v.id, item.slug);
     fs.mkdirSync(outDir, { recursive: true });
@@ -326,14 +360,14 @@ if (posts.length) {
     const cover = p.fm.cover ? `<img src="${p.fm.cover}" alt="">` : "";
     return `<a class="post-card" data-cat="${slugify(cat)}" href="/${p.slug}/"><div class="post-cover">${cover}<span class="post-cat ${catClass(cat)}">${cat}</span></div><div class="post-body"><div class="post-meta">${fmtDate(p.fm.date)}${p.fm.author?` · ${md.utils.escapeHtml(p.fm.author)}`:""}</div><h3>${md.utils.escapeHtml(p.fm.title||p.slug)}</h3><p>${md.utils.escapeHtml(p.fm.excerpt||"")}</p><span class="post-more">Read post ${ARROW}</span></div></a>`;
   }).join("");
-  const indexHtml = HEAD("Blog", "Announcements and how-tos from Skans Labs.") + SPRITE + topbar(blogBar)
-    + `<main class="blog-wrap"><div class="blog-hero"><span class="blog-eyebrow">Skans Labs</span><h1>Blog</h1><p>Product announcements, release notes, and hands-on how-tos.</p></div><div class="blog-filters">${chips}</div><div class="blog-grid" id="blogGrid">${cards}</div></main><script src="/docs.js?v=${JS_VER}" defer></script></body></html>`;
+  const indexHtml = HEAD("Announcements & how-tos", "Announcements and how-tos from Skans Labs.", { kind: "Blog", url: `${BLOG_URL}/` }) + SPRITE + topbar(blogBar)
+    + `<main class="blog-wrap"><div class="blog-hero"><span class="blog-eyebrow">Skans Labs</span><h1>Blog</h1><p>Product announcements, release notes, and hands-on how-tos.</p></div><div class="blog-filters">${chips}</div><div class="blog-grid" id="blogGrid">${cards}</div></main>` + footer() + `<script src="/docs.js?v=${JS_VER}" defer></script></body></html>`;
   fs.writeFileSync(path.join(DIST_BLOG, "index.html"), indexHtml);
   posts.forEach((p)=>{
     const cat = p.fm.category || "Post";
     const cover = p.fm.cover ? `<div class="post-hero-cover"><img src="${p.fm.cover}" alt=""></div>` : `<div class="post-hero-cover"></div>`;
-    const html = HEAD(p.fm.title||p.slug, p.fm.excerpt) + SPRITE + topbar(blogBar)
-      + `<article class="post-article"><a class="post-back" href="/">← All posts</a>${cover}<div class="post-head"><span class="post-cat ${catClass(cat)}">${cat}</span><h1>${md.utils.escapeHtml(p.fm.title||p.slug)}</h1><div class="post-byline">${p.fm.author?`<b>${md.utils.escapeHtml(p.fm.author)}</b><span class="dot"></span>`:""}${fmtDate(p.fm.date)}</div></div><div class="prose">${linkToDocs(md.render(p.content))}</div></article><script src="/docs.js?v=${JS_VER}" defer></script></body></html>`;
+    const html = HEAD(p.fm.title||p.slug, p.fm.excerpt, { kind: "Blog", url: `${BLOG_URL}/${p.slug}/` }) + SPRITE + topbar(blogBar)
+      + `<article class="post-article"><a class="post-back" href="/">← All posts</a>${cover}<div class="post-head"><span class="post-cat ${catClass(cat)}">${cat}</span><h1>${md.utils.escapeHtml(p.fm.title||p.slug)}</h1><div class="post-byline">${p.fm.author?`<b>${md.utils.escapeHtml(p.fm.author)}</b><span class="dot"></span>`:""}${fmtDate(p.fm.date)}</div></div><div class="prose">${linkToDocs(md.render(p.content))}</div></article>` + footer() + `<script src="/docs.js?v=${JS_VER}" defer></script></body></html>`;
     fs.mkdirSync(path.join(DIST_BLOG, p.slug), { recursive: true });
     fs.writeFileSync(path.join(DIST_BLOG, p.slug, "index.html"), html);
   });
@@ -343,6 +377,9 @@ if (posts.length) {
   fs.copyFileSync(FAVICON, path.join(DIST_BLOG, "favicon.svg"));
   fs.writeFileSync(path.join(DIST_BLOG, "docs.js"), CLIENT_JS);
   if (fs.existsSync(MEDIA)) fs.cpSync(MEDIA, path.join(DIST_BLOG, "media"), { recursive: true });
+  fs.writeFileSync(path.join(DIST_BLOG, "404.html"), errorPage("Blog", blogBar));
+  fs.writeFileSync(path.join(DIST_BLOG, "sitemap.xml"), sitemapXml([`${BLOG_URL}/`, ...posts.map((p) => `${BLOG_URL}/${p.slug}/`)]));
+  fs.writeFileSync(path.join(DIST_BLOG, "robots.txt"), robotsTxt(BLOG_URL));
   console.log(`  built blog (standalone) — ${posts.length} posts → dist-blog`);
 }
 
@@ -354,6 +391,11 @@ fs.writeFileSync(path.join(DIST, "index.html"),
   `<!DOCTYPE html><meta charset="utf-8"><title>${PRODUCT} Docs</title><meta http-equiv="refresh" content="0; url=${home}"><link rel="canonical" href="${home}"><script>location.replace(${JSON.stringify(home)})</script><a href="${home}">${PRODUCT} Documentation →</a>`);
 
 fs.writeFileSync(path.join(DIST, "search-index.json"), JSON.stringify(searchIndex));
+
+// branded 404 + robots + sitemap for the docs host
+fs.writeFileSync(path.join(DIST, "404.html"), errorPage("Docs", { active: "docs", blogHref: `${BLOG_URL}/` }));
+fs.writeFileSync(path.join(DIST, "sitemap.xml"), sitemapXml([`${DOCS_URL}/`, ...docsUrls]));
+fs.writeFileSync(path.join(DIST, "robots.txt"), robotsTxt(DOCS_URL));
 
 /* assets */
 fs.mkdirSync(path.join(DIST, "fonts"), { recursive: true });
