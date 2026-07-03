@@ -310,6 +310,9 @@ function errorPage(kind, bar) {
 
 const sitemapXml = (urls) => `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${u}</loc></url>`).join("\n")}\n</urlset>\n`;
 const robotsTxt = (host) => `User-agent: *\nAllow: /\n\nSitemap: ${host}/sitemap.xml\n`;
+// RFC 9116 responsible-disclosure file, mirrors the marketing host (per-host Canonical)
+const securityTxt = (host) => `# Skans Labs — responsible disclosure\n# ${host}/.well-known/security.txt\nContact: mailto:hello@skanslabs.com\nExpires: 2027-01-01T00:00:00.000Z\nPreferred-Languages: en\nCanonical: ${host}/.well-known/security.txt\n`;
+const writeWellKnown = (dist, host) => { fs.mkdirSync(path.join(dist, ".well-known"), { recursive: true }); fs.writeFileSync(path.join(dist, ".well-known", "security.txt"), securityTxt(host)); };
 
 function sidebar(nav, curVer, activeSlug) {
   const groups = nav.map((g) => {
@@ -441,6 +444,7 @@ if (posts.length) {
   fs.writeFileSync(path.join(DIST_BLOG, "sitemap.xml"), sitemapXml([`${BLOG_URL}/`, ...posts.map((p) => `${BLOG_URL}/${p.slug}/`)]));
   fs.writeFileSync(path.join(DIST_BLOG, "robots.txt"), robotsTxt(BLOG_URL));
   fs.writeFileSync(path.join(DIST_BLOG, `${INDEXNOW_KEY}.txt`), INDEXNOW_KEY);
+  writeWellKnown(DIST_BLOG, BLOG_URL);
   console.log(`  built blog (standalone) — ${posts.length} posts → dist-blog`);
 }
 
@@ -458,6 +462,7 @@ fs.writeFileSync(path.join(DIST, "404.html"), errorPage("Docs", { active: "docs"
 fs.writeFileSync(path.join(DIST, "sitemap.xml"), sitemapXml([`${DOCS_URL}/`, ...docsUrls]));
 fs.writeFileSync(path.join(DIST, "robots.txt"), robotsTxt(DOCS_URL));
 fs.writeFileSync(path.join(DIST, `${INDEXNOW_KEY}.txt`), INDEXNOW_KEY);
+writeWellKnown(DIST, DOCS_URL);
 
 // llms.txt — a curated index for AI crawlers (llmstxt.org)
 const LLMS_INTRO = "Skans is an on-premises security appliance that becomes the root of trust for isolated camera, IoT, OT, and building-automation networks. It gives every device its own certificate identity and adds access control (802.1X), patching, backup, monitoring, vulnerability management, and NIST 800-171 / CMMC compliance evidence — set up by the technician who installs the equipment, with nothing leaving the local network.";
