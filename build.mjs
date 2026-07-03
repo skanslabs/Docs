@@ -12,6 +12,9 @@ const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const CONTENT = path.join(ROOT, "content");
 const DIST = path.join(ROOT, "dist");
 const DIST_BLOG = path.join(ROOT, "dist-blog");
+// IndexNow key — hosted at /<key>.txt on each host so search engines can verify
+// change-notification pings. Public by design (not a secret). See deploy.sh ping.
+const INDEXNOW_KEY = "633776baf62f2edd553d1abced5d7d5f1def6f5c9cebb59643790280ebb3e015";
 const SITE_FONTS = path.join(ROOT, "assets/fonts");
 const FAVICON = path.join(ROOT, "assets/favicon.svg");
 // The docs and blog are served on separate hostnames; cross-links go absolute.
@@ -437,6 +440,7 @@ if (posts.length) {
   fs.writeFileSync(path.join(DIST_BLOG, "404.html"), errorPage("Blog", blogBar));
   fs.writeFileSync(path.join(DIST_BLOG, "sitemap.xml"), sitemapXml([`${BLOG_URL}/`, ...posts.map((p) => `${BLOG_URL}/${p.slug}/`)]));
   fs.writeFileSync(path.join(DIST_BLOG, "robots.txt"), robotsTxt(BLOG_URL));
+  fs.writeFileSync(path.join(DIST_BLOG, `${INDEXNOW_KEY}.txt`), INDEXNOW_KEY);
   console.log(`  built blog (standalone) — ${posts.length} posts → dist-blog`);
 }
 
@@ -453,6 +457,7 @@ fs.writeFileSync(path.join(DIST, "search-index.json"), JSON.stringify(searchInde
 fs.writeFileSync(path.join(DIST, "404.html"), errorPage("Docs", { active: "docs", blogHref: `${BLOG_URL}/` }));
 fs.writeFileSync(path.join(DIST, "sitemap.xml"), sitemapXml([`${DOCS_URL}/`, ...docsUrls]));
 fs.writeFileSync(path.join(DIST, "robots.txt"), robotsTxt(DOCS_URL));
+fs.writeFileSync(path.join(DIST, `${INDEXNOW_KEY}.txt`), INDEXNOW_KEY);
 
 // llms.txt — a curated index for AI crawlers (llmstxt.org)
 const LLMS_INTRO = "Skans is an on-premises security appliance that becomes the root of trust for isolated camera, IoT, OT, and building-automation networks. It gives every device its own certificate identity and adds access control (802.1X), patching, backup, monitoring, vulnerability management, and NIST 800-171 / CMMC compliance evidence — set up by the technician who installs the equipment, with nothing leaving the local network.";

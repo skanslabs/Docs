@@ -19,4 +19,18 @@ tar czf - -C dist-blog . | ssh -o StrictHostKeyChecking=accept-new nginx@192.168
    && find /var/www/blog -mindepth 1 -delete && cp -a ~/blog.new/. /var/www/blog/ \
    && rm -rf ~/blog.new'
 
+# IndexNow — tell Bing/Yandex/etc. to recrawl the changed URLs immediately.
+# Key file is emitted by build.mjs at /<key>.txt on both hosts (public, not a secret).
+# NOTE: the .239 auto-publish cron (~nginx/docs-publish.sh) does NOT run this — if you
+# want cron-published CMS edits to auto-ping too, add the same loop there.
+echo "▸ pinging IndexNow…"
+INDEXNOW_KEY=633776baf62f2edd553d1abced5d7d5f1def6f5c9cebb59643790280ebb3e015
+# best-effort — must never fail the deploy (hence the || true guards)
+for sm in dist/sitemap.xml dist-blog/sitemap.xml; do
+  grep -oE '<loc>[^<]+</loc>' "$sm" | sed -E 's|</?loc>||g' | while read -r u; do
+    [ -n "$u" ] || continue
+    curl -s -m 10 -o /dev/null "https://api.indexnow.org/indexnow?url=${u}&key=${INDEXNOW_KEY}" && echo "   pinged $u" || echo "   (ping failed: $u)"
+  done || true
+done
+
 echo "✓ live at https://docs.skanslabs.com/  and  https://blog.skanslabs.com/"
