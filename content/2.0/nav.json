@@ -13,6 +13,7 @@
     "group": "Concepts",
     "items": [
       { "title": "Device identity & the CA", "slug": "concepts/device-identity" },
+      { "title": "Network identity & correlation", "slug": "concepts/network-identity" },
       { "title": "The driver pack", "slug": "concepts/driver-pack" },
       { "title": "Distributed deployment", "slug": "concepts/distributed" }
     ]
@@ -39,7 +40,8 @@
   {
     "group": "Compliance",
     "items": [
-      { "title": "NIST 800-171 / CMMC evidence", "slug": "compliance/nist-cmmc-evidence" }
+      { "title": "NIST 800-171 / CMMC evidence", "slug": "compliance/nist-cmmc-evidence" },
+      { "title": "ISO/IEC 27001 evidence", "slug": "compliance/iso-27001-evidence" }
     ]
   },
   {
