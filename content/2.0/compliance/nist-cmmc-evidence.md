@@ -18,6 +18,8 @@ Skans is an **enabler, not a certification** — and not "CMMC in a box." No pro
 - **FIPS 140-3** — the appliance runs in FIPS approved-mode, but that is *capable*, not automatically *validated*
 - A **CIS Benchmark / DISA STIG** hardening baseline, applied by default at install
 
+The same evidence machinery also crosswalks to **ISO/IEC 27001:2022 Annex A** — see **[ISO/IEC 27001 evidence](/2.0/compliance/iso-27001-evidence/)** for that lane and its own honesty boundaries.
+
 ## The split: technical vs organizational
 
 Of the **110** requirements in 800-171, roughly **a third are organizational** — physical security, personnel, planning, awareness, and the process portions of assessment, incident response, and media protection. **Those remain the customer's responsibility.** Skans covers the **system and technical** controls a product can actually own, and hands you a **responsibility matrix** that spells out which is which.

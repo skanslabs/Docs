@@ -78,6 +78,15 @@ There are two very different reasons, and the fix differs.
 
 **Fix** — this is expected, and Skans is honest about it: the driver returns a **clear error and never fakes success**. The right remedy is to **secure the conduit** (put identity and access control on the switch or firewall in front of the device) and monitor it, rather than retry forever. More in the [driver pack](/2.0/concepts/driver-pack/) concept.
 
+**Cause 3 — it was secured before, but now shows a "Mismatch."** The device is serving a **different certificate** than the one Skans issued. Skans checks the *actual* certificate on the wire on every health sweep, so it flags this honestly instead of trusting an old success. Two situations:
+
+- **The device was factory-reset or replaced.** A certificate lives **on the device**, in its own NVRAM or configuration. A factory reset, a swapped-in replacement unit, or a device that came back on its own self-signed certificate loses the Skans-issued one. **Fix** — **re-enroll** it (the **Secure** / **Enroll** action on the device, or `--enroll <device>`); Skans redeploys the certificate and re-verifies it on the wire. Because Skans still holds the device credential, this is one click.
+- **The platform has no API to *bind* a pushed certificate (e.g., OPNsense).** A few platforms accept the certificate into their trust store but expose **no API to select it** for their web service — so they keep serving their built-in self-signed certificate. Skans imports the cert and reports the mismatch honestly; the final selection is a **one-time manual step**. For **OPNsense**: **System → Settings → Administration → SSL Certificate**, choose the Skans-issued certificate, and **Save**. After that first bind, automatic renewals reuse the selection — you won't touch it again.
+
+::: note
+A certificate mismatch is **not** a silent failure — it means Skans looked, saw the wrong cert on the wire, and told you. That's the same "verify, go green" honesty that makes a checkmark trustworthy.
+:::
+
 ### A client says the certificate isn't trusted
 
 **Likely cause** — cameras serve a **leaf-only** certificate, so a client that only has the root can't build the chain.
@@ -89,6 +98,12 @@ There are two very different reasons, and the fix differs.
 - **Restart the browser** after trust is added — browsers read the trust store at startup.
 - **Firefox / Thunderbird** keep their own trust store (they don't read the system one).
 - **Linux snap browsers** ignore the system store too — trust has to go in the snap.
+
+## A device I just added shows "offline" (but it's reachable)
+
+**Likely cause** — **"online" and "secured" are two different signals.** *Online* is set by a periodic **reachability** health check; a **certificate** is deployed by an **active push** Skans makes *to* the device. Enrollment doesn't require the device to already read "online" — Skans reaches out, authenticates, and installs the certificate regardless. So a device can be **fully certificate-managed and still read "offline"** for a moment right after you add it, simply because the reachability probe hadn't run yet.
+
+**Fix** — usually nothing. A freshly added or discovered device is **probed immediately** on creation, so it reports its true reachability within a second or two, and the next scheduled sweep re-confirms it. If a device *stays* offline while you can otherwise reach it, the appliance genuinely can't — check the **management VLAN, IP, and firewall** between the appliance and the device, not the display. (Removing a device clears it from the state view immediately as well — no lingering "ghost" row.)
 
 ## The agent isn't appearing — or won't approve
 

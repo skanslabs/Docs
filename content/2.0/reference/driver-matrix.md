@@ -141,6 +141,11 @@ Skans covers a device across **four capability lanes** — and cert-deploy is on
 schedule ("LAPS for cameras"). *NAC*: write RADIUS + 802.1X/MAB to the fabric. *SCEP*: on-device CSR enrolment. *Firmware*:
 read the running version for CVE-matching. *Config-backup*: pull the running-config over SSH, versioned + change-detected.
 
+A few platforms accept a certificate but expose **no API to bind it** to their web service — **OPNsense** is the notable one
+(upstream limitation). Skans imports the cert and reports the mismatch honestly; the one-time selection is manual (System →
+Settings → Administration → SSL Certificate). See [Troubleshooting → certificate mismatch](/2.0/reference/troubleshooting/).
+Certificates live **on the device**, so a factory-reset or replaced unit shows a mismatch until you **re-enroll** it.
+
 ---
 
 ## Monitor / ingest lane — the OT/IoT coverage the table above can't show
