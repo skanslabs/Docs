@@ -2,55 +2,135 @@
   {
     "group": "Getting Started",
     "items": [
-      { "title": "Introduction", "slug": "getting-started/introduction" },
-      { "title": "How Skans works", "slug": "getting-started/how-skans-works" },
-      { "title": "Requirements", "slug": "getting-started/requirements" },
-      { "title": "Installation", "slug": "getting-started/installation" },
-      { "title": "Quickstart", "slug": "getting-started/quickstart" }
+      {
+        "title": "Introduction",
+        "slug": "getting-started/introduction"
+      },
+      {
+        "title": "How Skans works",
+        "slug": "getting-started/how-skans-works"
+      },
+      {
+        "title": "Requirements",
+        "slug": "getting-started/requirements"
+      },
+      {
+        "title": "Installation",
+        "slug": "getting-started/installation"
+      },
+      {
+        "title": "Quickstart",
+        "slug": "getting-started/quickstart"
+      }
     ]
   },
   {
     "group": "Concepts",
     "items": [
-      { "title": "Device identity & the CA", "slug": "concepts/device-identity" },
-      { "title": "Network identity & correlation", "slug": "concepts/network-identity" },
-      { "title": "The driver pack", "slug": "concepts/driver-pack" },
-      { "title": "Distributed deployment", "slug": "concepts/distributed" }
+      {
+        "title": "Device identity & the CA",
+        "slug": "concepts/device-identity"
+      },
+      {
+        "title": "Network identity & correlation",
+        "slug": "concepts/network-identity"
+      },
+      {
+        "title": "The driver pack",
+        "slug": "concepts/driver-pack"
+      },
+      {
+        "title": "Distributed deployment",
+        "slug": "concepts/distributed"
+      }
     ]
   },
   {
     "group": "How-tos",
     "items": [
-      { "title": "Enroll a device", "slug": "how-tos/enroll-a-device" },
-      { "title": "Install the Windows agent", "slug": "how-tos/install-the-agent" },
-      { "title": "802.1X access control", "slug": "how-tos/network-access-control" },
-      { "title": "Patching & firmware", "slug": "how-tos/patching" },
-      { "title": "Backup & recovery", "slug": "how-tos/backup" },
-      { "title": "Manage credentials", "slug": "how-tos/manage-credentials" },
-      { "title": "Smart-card login", "slug": "how-tos/smartcard-login" }
+      {
+        "title": "Enroll a device",
+        "slug": "how-tos/enroll-a-device"
+      },
+      {
+        "title": "Install the Windows agent",
+        "slug": "how-tos/install-the-agent"
+      },
+      {
+        "title": "802.1X access control",
+        "slug": "how-tos/network-access-control"
+      },
+      {
+        "title": "Patching & firmware",
+        "slug": "how-tos/patching"
+      },
+      {
+        "title": "Backup & recovery",
+        "slug": "how-tos/backup"
+      },
+      {
+        "title": "Manage credentials",
+        "slug": "how-tos/manage-credentials"
+      },
+      {
+        "title": "Smart-card login",
+        "slug": "how-tos/smartcard-login"
+      }
     ]
   },
   {
     "group": "Monitoring",
     "items": [
-      { "title": "Monitoring & alerts", "slug": "monitoring/alerts" },
-      { "title": "Vulnerability management", "slug": "monitoring/vulnerability-management" }
+      {
+        "title": "Monitoring & alerts",
+        "slug": "monitoring/alerts"
+      },
+      {
+        "title": "Vulnerability management",
+        "slug": "monitoring/vulnerability-management"
+      }
     ]
   },
   {
     "group": "Compliance",
     "items": [
-      { "title": "NIST 800-171 / CMMC evidence", "slug": "compliance/nist-cmmc-evidence" },
-      { "title": "ISO/IEC 27001 evidence", "slug": "compliance/iso-27001-evidence" }
+      {
+        "title": "NIST 800-171 / CMMC evidence",
+        "slug": "compliance/nist-cmmc-evidence"
+      },
+      {
+        "title": "ISO/IEC 27001 evidence",
+        "slug": "compliance/iso-27001-evidence"
+      }
     ]
   },
   {
     "group": "Reference",
     "items": [
-      { "title": "Roles & RBAC", "slug": "reference/roles-and-rbac" },
-      { "title": "Ports & network", "slug": "reference/ports" },
-      { "title": "Troubleshooting", "slug": "reference/troubleshooting" },
-      { "title": "Release notes", "slug": "reference/release-notes" }
+      {
+        "title": "Roles & RBAC",
+        "slug": "reference/roles-and-rbac"
+      },
+      {
+        "title": "Device support matrix",
+        "slug": "reference/driver-matrix"
+      },
+      {
+        "title": "Security hardening",
+        "slug": "reference/security-hardening"
+      },
+      {
+        "title": "Ports & network",
+        "slug": "reference/ports"
+      },
+      {
+        "title": "Troubleshooting",
+        "slug": "reference/troubleshooting"
+      },
+      {
+        "title": "Release notes",
+        "slug": "reference/release-notes"
+      }
     ]
   }
 ]
