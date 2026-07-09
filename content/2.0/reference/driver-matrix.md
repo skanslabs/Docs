@@ -7,7 +7,7 @@ description: Every device in a Skans enclave, across four capability lanes — m
 Skans covers a device across **four capability lanes** — and cert-deploy is only one of them. The most important devices in an enclave often *can't* hold a certificate at all; for those, the monitor/ingest lane is the entire story.
 
 ::: note
-**The four lanes.** **Manage** (write to the device): cert-deploy, rotate the admin password, write 802.1X/NAC config, enroll via SCEP. **Read**: firmware version (for CVE-matching), neighbor/LLDP decode. **Monitor / ingest**: syslog → OpenSearch, SNMP poll, SNMP traps, EtherNet/IP, Modbus, config-backup. **Notify**: SMTP, webhook, SIEM-forward. The table below is the manage + read lanes plus config-backup, **generated directly from the signed pack** so it never drifts; the monitor/ingest lane is described in its own section after the table.
+**The four lanes.** **Manage** (write to the device): cert-deploy, rotate the admin password, write 802.1X/NAC config, enroll via SCEP. **Read**: firmware version (for CVE-matching), neighbor/LLDP decode. **Monitor / ingest**: syslog → OpenSearch, SNMP poll, SNMP traps, EtherNet/IP, Modbus, config-backup. **Notify**: SMTP, webhook, SIEM-forward. The table below is the manage + read lanes plus config-backup, **generated directly from the signed pack** so it never drifts. The monitor/ingest lane isn't a per-vendor column because it's **per-protocol** — syslog, SNMP, EtherNet/IP, and Modbus work with *any* device that speaks them, not a specific driver — so it's described in its own section after the table, with dedicated pages: **[Syslog ingestion](/2.0/monitoring/syslog/)**, **[SNMP monitoring](/2.0/monitoring/snmp/)**, and **[Industrial protocols (OT/ICS)](/2.0/monitoring/industrial-protocols/)**.
 :::
 
 ::: warning
@@ -164,6 +164,8 @@ and the **monitor/ingest lane**, which is a separate collector process (`Skans.C
 | **Config-backup** (SSH show-run) | running-config, versioned + change-detected (the column above) | encrypted store + drift report |
 
 Every active collector is OT-safe: per-target maintenance windows, poll rate-limiting, source-IP allowlists, read-only probing.
+
+Each has its own page: **[Syslog ingestion](/2.0/monitoring/syslog/)**, **[SNMP monitoring](/2.0/monitoring/snmp/)** (poll + traps), and **[Industrial protocols (OT/ICS)](/2.0/monitoring/industrial-protocols/)** (EtherNet/IP + Modbus). Config-backup and off-box archiving are in **[Backup & recovery](/2.0/how-tos/backup/)**.
 
 **Coverage reality:** the SNMP profile pack carries **~484 vendor enterprise profiles**; the large majority of them —
 power/UPS (Vertiv, Eltek), environmental (Stulz, Carel, AKCP), industrial/OT (Moxa, Hirschmann, ABB, Schneider), optical,
