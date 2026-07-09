@@ -1,0 +1,162 @@
+---
+title: Driver validation status
+eyebrow: Reference
+description: What has been PROVEN per driver x lane — hardware, emulation, or spec-verified. The honest counterpart to the capability matrix, which shows only what each driver claims.
+---
+
+The [capability matrix](/2.0/reference/driver-matrix/) shows what each driver **claims** it can do — generated straight from the signed pack, so it never drifts. This page shows what's been **proven**. Most drivers were authored from vendor documentation and adversarially cross-checked but are honestly **not yet device-tested**; this page never dresses that up as more than it is.
+
+::: note
+Validation is a **ladder, not a checkbox**: 📋 *spec-verified* (authored + cross-checked against vendor docs) → 🧪 *emulation* (proven end-to-end on a simulator, e.g. EVE-NG) → 🟢 *hardware* (proven on the real device). A ⚠️ *known-issue* cell was tested and works with a documented caveat. A blank cell means the driver doesn't implement that lane. The monitor columns (SNMP/syslog) are marked only where a real device proved them, since they're per-protocol, not a per-driver claim.
+:::
+
+*Snapshot regenerated from `SkansCP --driver-validation`; updated on each test pass.*
+
+**Cert-deploy (116 drivers):** 8 hardware-validated · 1 emulation-validated · 1 known-issue · **106 spec-verified (pending a device)**. The monitor columns (SNMP/syslog) are marked only where a real device proved them.
+
+| Vendor | Driver | Cert-deploy | Rotate | NAC | SCEP | Firmware | Config-backup | SNMP | Syslog |
+|---|---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| `a10` | A10 | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `acti` | ACTi | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `advantech` | Advantech | 📋 spec |  |  |  |  |  |  |  |
+| `apc` | APC | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `arista` | Arista | 📋 spec | 📋 spec |  |  |  | 📋 spec |  |  |
+| `arubacx` | Aruba CX | 🧪 emu | 🧪 emu |  |  |  | 🧪 emu | 🧪 emu | 🧪 emu |
+| `audiocodes` | AudioCodes | 📋 spec |  |  |  |  |  |  |  |
+| `avaya` | Avaya | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `avigilon` | Avigilon | 📋 spec |  |  |  |  |  |  |  |
+| `avigilonacm` | Avigilon ACM | 📋 spec |  |  |  |  |  |  |  |
+| `axis` | Axis | 🟢 HW | 📋 spec |  |  | 📋 spec |  |  |  |
+| `barracuda` | Barracuda | 📋 spec |  |  |  |  |  |  |  |
+| `beckhofftwincat` | Beckhoff TwinCAT | 📋 spec |  |  |  |  |  |  |  |
+| `belimo` | Belimo | 📋 spec |  |  |  |  |  |  |  |
+| `bosch` | Bosch | 🟢 HW | 📋 spec |  |  | 📋 spec |  |  |  |
+| `boschintrusion` | Bosch Intrusion | 📋 spec |  |  |  |  |  |  |  |
+| `brocadeicx` | Brocade ICX | 📋 spec | 📋 spec |  |  |  | 📋 spec |  |  |
+| `brother` | Brother | 📋 spec |  |  |  |  |  |  |  |
+| `cambium` | Cambium | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `canon` | Canon | 📋 spec |  |  |  |  |  |  |  |
+| `checkpoint` | Check Point | 📋 spec |  |  |  |  |  |  |  |
+| `ciscoasa` | Cisco ASA | 📋 spec | 📋 spec |  |  |  | 📋 spec |  |  |
+| `ciscoftd` | Cisco FTD | 📋 spec |  |  |  |  |  |  |  |
+| `ciscoios` | Cisco IOS (classic) |  |  |  | 📋 spec |  |  |  |  |
+| `ciscoiosxe` | Cisco IOS-XE | 📋 spec | 📋 spec |  |  |  | 📋 spec |  |  |
+| `cisconxos` | Cisco NX-OS | 📋 spec | 📋 spec |  |  |  | 📋 spec |  |  |
+| `ciscowlc` | Cisco WLC | 📋 spec | 📋 spec |  |  |  | 📋 spec |  |  |
+| `citrixadc` | Citrix ADC | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `comware` | Comware | 📋 spec | 📋 spec |  |  |  | 📋 spec |  |  |
+| `cradlepoint` | Cradlepoint | 📋 spec |  |  |  |  |  |  |  |
+| `crestron` | Crestron | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `cyberpower` | CyberPower | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `dahua` | Dahua | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `dellome` | Dell OpenManage | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `dellos10` | Dell OS10 | 📋 spec | 📋 spec |  |  |  | 📋 spec |  |  |
+| `dellpowerstore` | Dell PowerStore | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `dellunity` | Dell Unity | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `distech` | Distech Controls | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `draytek` | DrayTek | 📋 spec |  |  |  |  |  |  |  |
+| `eaton` | Eaton | 📋 spec |  |  |  |  |  |  |  |
+| `edgeos` | EdgeOS | 📋 spec | 📋 spec |  |  |  | 📋 spec |  |  |
+| `emersondeltav` | Emerson DeltaV | 📋 spec |  |  |  |  |  |  |  |
+| `emersonpac` | Emerson PACSystems | 📋 spec |  |  |  |  |  |  |  |
+| `extreme` | Extreme | 📋 spec | 📋 spec |  |  |  | 📋 spec |  |  |
+| `f5` | F5 | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `fortinet` | Fortinet | 📋 spec |  |  |  |  | 📋 spec |  |  |
+| `fs` | FS | 🟢 HW | 📋 spec |  |  | 📋 spec |  |  |  |
+| `geovision` | GeoVision | 📋 spec |  |  |  |  |  |  |  |
+| `grandstream` | Grandstream | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `hanwha` | Hanwha | 🟢 HW | 📋 spec |  |  | 📋 spec |  |  |  |
+| `hikvision` | Hikvision | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `hirschmann` | Hirschmann | 📋 spec | 📋 spec |  |  |  | 📋 spec |  |  |
+| `hitachivsp` | Hitachi VSP | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `honeywell` | Honeywell | 📋 spec |  |  |  |  |  |  |  |
+| `hpealletra` | HPE Alletra 5000/6000 & Nimble (NimbleOS) | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `hpeoneview` | HPE OneView | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `hpeprimera` | HPE Primera | 📋 spec |  |  |  |  |  |  |  |
+| `hpprinter` | HP Printer | 📋 spec |  |  |  |  |  |  |  |
+| `huawei` | Huawei | 📋 spec | 📋 spec |  |  |  | 📋 spec |  |  |
+| `ibmstorage` | IBM Storage | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `ifm` | ifm | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `infinidat` | Infinidat | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `ipro` | i-PRO | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `jcimetasys` | JCI Metasys | 📋 spec |  |  |  |  |  |  |  |
+| `juniper` | Juniper | 📋 spec |  |  |  |  | 📋 spec |  |  |
+| `kemp` | Kemp | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `konica` | Konica Minolta | 📋 spec |  |  |  |  |  |  |  |
+| `lenels2netbox` | LenelS2 NetBox | 📋 spec |  |  |  |  |  |  |  |
+| `mercury` | Mercury Security | 📋 spec |  |  |  |  |  |  |  |
+| `mikrotik` | MikroTik | 📋 spec | 📋 spec |  |  |  | 📋 spec |  |  |
+| `mitsubishimelsec` | Mitsubishi MELSEC | 📋 spec |  |  |  |  |  |  |  |
+| `moxa` | Moxa | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `netapp` | NetApp | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `netgear` | Netgear | 📋 spec | 📋 spec |  |  |  | 📋 spec |  |  |
+| `nutanix` | Nutanix | 📋 spec |  |  |  |  |  |  |  |
+| `omronnx` | Omron NX | 📋 spec |  |  |  |  |  |  |  |
+| `onvif` | ONVIF | 🟢 HW | 📋 spec |  |  |  |  |  |  |
+| `opengear` | Opengear | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `opnsense` | OPNsense | ⚠️ issue |  |  |  |  |  | 🧪 emu | 🧪 emu |
+| `opto22` | Opto 22 | 📋 spec |  |  |  |  |  |  |  |
+| `paloalto` | Palo Alto | 📋 spec |  |  |  |  | 📋 spec |  |  |
+| `peplink` | Peplink | 📋 spec |  |  |  |  |  |  |  |
+| `pfsense` | pfSense | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `phoenixplcnext` | Phoenix PLCnext | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `poly` | Poly | 📋 spec |  |  |  |  |  |  |  |
+| `powerscale` | Dell PowerScale | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `proxmox` | Proxmox | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `purestorage` | Pure Storage | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `qnap` | QNAP | 📋 spec |  |  |  |  |  |  |  |
+| `radware` | Radware | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `raritan` | Raritan | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `redfish` | Redfish (iDRAC/iLO) | 🟢 HW | 📋 spec |  |  |  |  |  |  |
+| `ricoh` | Ricoh | 📋 spec |  |  |  |  |  |  |  |
+| `rockwellstratix` | Rockwell Stratix | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `ruckus` | Ruckus | 📋 spec |  |  |  |  | 📋 spec |  |  |
+| `servertech` | Server Technology | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `siemensdesigo` | Siemens Desigo | 📋 spec |  |  |  |  |  |  |  |
+| `siemenss7` | Siemens S7 | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `siemenss71200` | Siemens S7-1200 | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `sonicwall` | SonicWall | 📋 spec |  |  |  |  | 📋 spec |  |  |
+| `sophos` | Sophos | 📋 spec |  |  |  |  |  |  |  |
+| `synology` | Synology | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `tridium` | Tridium Niagara | 📋 spec |  |  |  |  |  |  |  |
+| `tripplite` | Tripp Lite | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `truenas` | TrueNAS | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `twon` | 2N | 🟢 HW |  |  |  | 📋 spec |  |  |  |
+| `unifi` | UniFi | 🟢 HW |  | 🟢 HW |  |  | 📋 spec |  |  |
+| `uniview` | Uniview | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `vertiv` | Vertiv | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `vivotek` | Vivotek |  | 📋 spec |  |  |  |  |  |  |
+| `vmwareesxi` | VMware ESXi | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `vmwarensx` | VMware NSX | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `vmwarevcenter` | VMware vCenter | 📋 spec |  |  |  |  |  |  |  |
+| `wago` | WAGO | 📋 spec | 📋 spec |  |  |  |  |  |  |
+| `watchguard` | WatchGuard | 📋 spec |  |  |  |  |  |  |  |
+| `xerox` | Xerox | 📋 spec |  |  |  |  |  |  |  |
+| `yealink` | Yealink | 📋 spec |  |  |  |  |  |  |  |
+| `zyxel` | Zyxel | 📋 spec | 📋 spec |  |  |  | 📋 spec |  |  |
+
+## Validated so far — evidence
+
+- **`arubacx` · cert-deploy** — emulation on Aruba AOS-CX simulator 10.13.1180 (EVE-NG): served serial == issued serial, chained to Skans Root CA; 8 driver bugs found + fixed during validation
+- **`arubacx` · config-backup** — emulation on Aruba AOS-CX simulator: running-config captured + change-detected across a real edit
+- **`arubacx` · rotate** — emulation on Aruba AOS-CX simulator: rotated + re-auth verified + vault synced + old password rejected
+- **`arubacx` · snmp** — emulation on Aruba AOS-CX simulator: interface metrics polled into skans-metrics
+- **`arubacx` · syslog** — emulation on Aruba AOS-CX simulator: config-change events ingested into skans-netlog
+- **`axis` · cert-deploy** — hardware on Axis camera: hardware-validated cert-deploy
+- **`bosch` · cert-deploy** — hardware on Bosch camera: hardware-validated cert-deploy
+- **`fs` · cert-deploy** — hardware on FS switch: hardware-validated cert-deploy
+- **`hanwha` · cert-deploy** — hardware on Hanwha camera: hardware-validated cert-deploy
+- **`onvif` · cert-deploy** — hardware on ONVIF device: hardware-validated cert-deploy (generic ONVIF)
+- **`opnsense` · cert-deploy** — known-issue on OPNsense (EVE-NG): cert imported to the trust store; final GUI bind is a documented one-time manual step (no bind API upstream, #9399)
+- **`opnsense` · snmp** — emulation on OPNsense (EVE-NG): interface metrics into skans-metrics
+- **`opnsense` · syslog** — emulation on OPNsense (EVE-NG): firewall syslog (RFC 5424) parsed + device-tagged into skans-netlog
+- **`redfish` · cert-deploy** — hardware on Redfish BMC: hardware-validated cert-deploy
+- **`twon` · cert-deploy** — hardware on 2N intercom: hardware-validated cert-deploy
+- **`unifi` · cert-deploy** — hardware on UniFi controller: hardware-validated
+- **`unifi` · nac** — hardware on UniFi + Windows NPS: 802.1X MAB proven live (then reverted); controller TLS + SSH host key pinned
+
+## Next
+
+- **[Device support matrix](/2.0/reference/driver-matrix/)** — what each driver *claims* (auto-generated from the pack)
+- **[Enroll a device](/2.0/how-tos/enroll-a-device/)** — the cert-deploy lane in depth
+- **[Syslog ingestion](/2.0/monitoring/syslog/)** and **[SNMP monitoring](/2.0/monitoring/snmp/)** — the monitor lanes
