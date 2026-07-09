@@ -16,6 +16,8 @@ Skans covers a device across **four capability lanes** — and cert-deploy is on
 
 **118 device drivers** — 116 cert-deploy · 69 credential-rotate · 1 NAC/802.1X · 1 SCEP · 5 firmware-read · 21 config-backup.
 
+> **A ✓ means the driver *implements* that lane** — its declared capability, read straight from the signed pack. It is **not** a claim that the lane has been validated on a device. For what's actually been **proven** per driver — hardware, emulation, or still spec-verified — see **[Driver validation status](/2.0/reference/driver-validation/)**, where most cells are honestly still 📋 spec-verified.
+
 | Vendor | Driver | Cert-deploy | Rotate creds | NAC (802.1X) | SCEP | Firmware | Config-backup |
 |---|---|:--:|:--:|:--:|:--:|:--:|:--:|
 | `a10` | A10 | ✓ | ✓ |   |   |   |   |

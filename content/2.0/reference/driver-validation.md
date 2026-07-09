@@ -10,9 +10,9 @@ The [capability matrix](/2.0/reference/driver-matrix/) shows what each driver **
 Validation is a **ladder, not a checkbox**: 📋 *spec-verified* (authored + cross-checked against vendor docs) → 🧪 *emulation* (proven end-to-end on a simulator, e.g. EVE-NG) → 🟢 *hardware* (proven on the real device). A ⚠️ *known-issue* cell was tested and works with a documented caveat. A blank cell means the driver doesn't implement that lane. The monitor columns (SNMP/syslog) are marked only where a real device proved them, since they're per-protocol, not a per-driver claim.
 :::
 
-*Snapshot regenerated from `SkansCP --driver-validation`; updated on each test pass.*
+*Mirrors the validation ledger the console reads (`C:\Skans\driver-validation-ledger.json`); regenerate with `SkansCP --driver-validation` after each test pass. A cell is green only when an executed test produced it — never hand-authored ahead of the proof.*
 
-**Cert-deploy (116 drivers):** 8 hardware-validated · 1 emulation-validated · 1 known-issue · **106 spec-verified (pending a device)**. The monitor columns (SNMP/syslog) are marked only where a real device proved them.
+**Cert-deploy (116 drivers):** 8 hardware-validated · 1 emulation-validated (Aruba CX) · 1 known-issue (OPNsense) · **106 spec-verified (pending a device)**. **NAC:** the single 802.1X driver (UniFi) is a ⚠️ known-issue — proven once on hardware then reverted, not enforced today. The monitor columns (SNMP/syslog) are marked only where a real device proved them.
 
 | Vendor | Driver | Cert-deploy | Rotate | NAC | SCEP | Firmware | Config-backup | SNMP | Syslog |
 |---|---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
@@ -122,7 +122,7 @@ Validation is a **ladder, not a checkbox**: 📋 *spec-verified* (authored + cro
 | `tripplite` | Tripp Lite | 📋 spec | 📋 spec |  |  |  |  |  |  |
 | `truenas` | TrueNAS | 📋 spec | 📋 spec |  |  |  |  |  |  |
 | `twon` | 2N | 🟢 HW |  |  |  | 📋 spec |  |  |  |
-| `unifi` | UniFi | 🟢 HW |  | 🟢 HW |  |  | 📋 spec |  |  |
+| `unifi` | UniFi | 🟢 HW |  | ⚠️ issue |  |  | 📋 spec |  |  |
 | `uniview` | Uniview | 📋 spec | 📋 spec |  |  |  |  |  |  |
 | `vertiv` | Vertiv | 📋 spec | 📋 spec |  |  |  |  |  |  |
 | `vivotek` | Vivotek |  | 📋 spec |  |  |  |  |  |  |
@@ -140,20 +140,19 @@ Validation is a **ladder, not a checkbox**: 📋 *spec-verified* (authored + cro
 - **`arubacx` · cert-deploy** — emulation on Aruba AOS-CX simulator 10.13.1180 (EVE-NG): served serial == issued serial, chained to Skans Root CA; 8 driver bugs found + fixed during validation
 - **`arubacx` · config-backup** — emulation on Aruba AOS-CX simulator: running-config captured + change-detected across a real edit
 - **`arubacx` · rotate** — emulation on Aruba AOS-CX simulator: rotated + re-auth verified + vault synced + old password rejected
-- **`arubacx` · snmp** — emulation on Aruba AOS-CX simulator: interface metrics polled into skans-metrics
-- **`arubacx` · syslog** — emulation on Aruba AOS-CX simulator: config-change events ingested into skans-netlog
+- **`arubacx` · snmp** — emulation on Aruba AOS-CX simulator: interface metrics land **fresh** (source-filtered, `<10 min` window) in skans-metrics — the check proves the poller is live *now*, not that a doc once existed
+- **`arubacx` · syslog** — emulation on Aruba AOS-CX simulator: a **triggered** config-change event arrives **fresh** (`<3 min`, source-filtered) in skans-netlog — a stale/dead collector fails this
+- **`opnsense` · snmp / syslog** — emulation on OPNsense (EVE-NG, `192.168.102.77`): 342 fresh SNMP + 974 fresh syslog docs (source-filtered, `<10 min`) — measured live
 - **`axis` · cert-deploy** — hardware on Axis camera: hardware-validated cert-deploy
 - **`bosch` · cert-deploy** — hardware on Bosch camera: hardware-validated cert-deploy
 - **`fs` · cert-deploy** — hardware on FS switch: hardware-validated cert-deploy
 - **`hanwha` · cert-deploy** — hardware on Hanwha camera: hardware-validated cert-deploy
 - **`onvif` · cert-deploy** — hardware on ONVIF device: hardware-validated cert-deploy (generic ONVIF)
 - **`opnsense` · cert-deploy** — known-issue on OPNsense (EVE-NG): cert imported to the trust store; final GUI bind is a documented one-time manual step (no bind API upstream, #9399)
-- **`opnsense` · snmp** — emulation on OPNsense (EVE-NG): interface metrics into skans-metrics
-- **`opnsense` · syslog** — emulation on OPNsense (EVE-NG): firewall syslog (RFC 5424) parsed + device-tagged into skans-netlog
 - **`redfish` · cert-deploy** — hardware on Redfish BMC: hardware-validated cert-deploy
 - **`twon` · cert-deploy** — hardware on 2N intercom: hardware-validated cert-deploy
 - **`unifi` · cert-deploy** — hardware on UniFi controller: hardware-validated
-- **`unifi` · nac** — hardware on UniFi + Windows NPS: 802.1X MAB proven live (then reverted); controller TLS + SSH host key pinned
+- **`unifi` · nac** — **known-issue** on UniFi + Windows NPS: 802.1X MAB was proven live *once* then **reverted** — nothing is 802.1X-enforced on the fabric today. Controller TLS + SSH host key are pinned. Re-validate before showing this green.
 
 ## Next
 
