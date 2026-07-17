@@ -11,10 +11,10 @@ Skans covers a device across **four capability lanes** — and cert-deploy is on
 :::
 
 ::: warning
-**Shipping is not the same as hardware-validated.** Eight cert-deploy drivers are proven end-to-end on lab hardware — Axis, 2N, Bosch, FS, Hanwha, ONVIF, Redfish, and UniFi. The rest were authored from each vendor's official management API and adversarially cross-checked, with hardware validation pending. Pilot an unvalidated driver on one device first. *(The syslog ingest lane was validated live on an emulated OPNsense firewall — device syslog → OpenSearch, correctly parsed and tagged.)*
+**Shipping is not the same as validated.** Eight cert-deploy drivers are proven on **real hardware** — Axis, 2N, Bosch, FS, Hanwha, ONVIF, Redfish, and UniFi. Another eight are proven **end-to-end on emulated devices** (Cisco CML / EVE-NG): the Cisco fleet — Catalyst 9000v switches, ASAv, IOS-XE routers, Nexus 9300v, and the Catalyst 9800-CL wireless controller — plus Aruba CX. The rest were authored from each vendor's official management API and adversarially cross-checked, still **device-pending**. See the [Driver validation status](/2.0/reference/driver-validation/) page for the exact per-driver × per-lane proof; pilot a spec-verified driver on one device first. *(The syslog ingest lane was also validated live on an emulated OPNsense firewall.)*
 :::
 
-**118 device drivers** — 116 cert-deploy · 69 credential-rotate · 1 NAC/802.1X · 1 SCEP · 5 firmware-read · 21 config-backup.
+**122 device drivers** — 120 cert-deploy · 75 credential-rotate · 10 NAC/802.1X · 1 SCEP · 13 firmware-read · 26 config-backup.
 
 > **A ✓ means the driver *implements* that lane** — its declared capability, read straight from the signed pack. It is **not** a claim that the lane has been validated on a device. For what's actually been **proven** per driver — hardware, emulation, or still spec-verified — see **[Driver validation status](/2.0/reference/driver-validation/)**, where most cells are honestly still 📋 spec-verified.
 
@@ -25,7 +25,7 @@ Skans covers a device across **four capability lanes** — and cert-deploy is on
 | `advantech` | Advantech | ✓ |   |   |   |   |   |
 | `apc` | APC | ✓ | ✓ |   |   |   |   |
 | `arista` | Arista | ✓ | ✓ |   |   |   | ✓ |
-| `arubacx` | Aruba CX | ✓ | ✓ |   |   |   |   |
+| `arubacx` | Aruba CX | ✓ | ✓ | ✓ |   |   | ✓ |
 | `audiocodes` | AudioCodes | ✓ |   |   |   |   |   |
 | `avaya` | Avaya | ✓ | ✓ |   |   |   |   |
 | `avigilon` | Avigilon | ✓ |   |   |   |   |   |
@@ -41,10 +41,14 @@ Skans covers a device across **four capability lanes** — and cert-deploy is on
 | `cambium` | Cambium | ✓ | ✓ |   |   |   |   |
 | `canon` | Canon | ✓ |   |   |   |   |   |
 | `checkpoint` | Check Point | ✓ |   |   |   |   |   |
-| `ciscoasa` | Cisco ASA | ✓ | ✓ |   |   |   | ✓ |
+| `cisco9200` | Cisco Catalyst 9200 | ✓ | ✓ | ✓ |   | ✓ | ✓ |
+| `cisco9300` | Cisco Catalyst 9300 | ✓ | ✓ | ✓ |   | ✓ | ✓ |
+| `cisco9500` | Cisco Catalyst 9500 | ✓ | ✓ | ✓ |   | ✓ | ✓ |
+| `ciscoasa` | Cisco ASA | ✓ | ✓ | ✓ |   | ✓ | ✓ |
 | `ciscoftd` | Cisco FTD | ✓ |   |   |   |   |   |
 | `ciscoios` | Cisco IOS (classic) |   |   |   | ✓ |   |   |
-| `ciscoiosxe` | Cisco IOS-XE | ✓ | ✓ |   |   |   | ✓ |
+| `ciscoiosxe` | Cisco IOS-XE | ✓ | ✓ | ✓ |   | ✓ | ✓ |
+| `ciscoiosxr` | Cisco IOS-XR | ✓ |   |   |   |   | ✓ |
 | `cisconxos` | Cisco NX-OS | ✓ | ✓ |   |   |   | ✓ |
 | `ciscowlc` | Cisco WLC | ✓ | ✓ |   |   |   | ✓ |
 | `citrixadc` | Citrix ADC | ✓ | ✓ |   |   |   |   |
@@ -65,7 +69,7 @@ Skans covers a device across **four capability lanes** — and cert-deploy is on
 | `emersonpac` | Emerson PACSystems | ✓ |   |   |   |   |   |
 | `extreme` | Extreme | ✓ | ✓ |   |   |   | ✓ |
 | `f5` | F5 | ✓ | ✓ |   |   |   |   |
-| `fortinet` | Fortinet | ✓ |   |   |   |   | ✓ |
+| `fortinet` | Fortinet | ✓ | ✓ | ✓ |   | ✓ | ✓ |
 | `fs` | FS | ✓ | ✓ |   |   | ✓ |   |
 | `geovision` | GeoVision | ✓ |   |   |   |   |   |
 | `grandstream` | Grandstream | ✓ | ✓ |   |   |   |   |
@@ -84,7 +88,7 @@ Skans covers a device across **four capability lanes** — and cert-deploy is on
 | `infinidat` | Infinidat | ✓ | ✓ |   |   |   |   |
 | `ipro` | i-PRO | ✓ | ✓ |   |   |   |   |
 | `jcimetasys` | JCI Metasys | ✓ |   |   |   |   |   |
-| `juniper` | Juniper | ✓ |   |   |   |   | ✓ |
+| `juniper` | Juniper | ✓ | ✓ | ✓ |   | ✓ | ✓ |
 | `kemp` | Kemp | ✓ | ✓ |   |   |   |   |
 | `konica` | Konica Minolta | ✓ |   |   |   |   |   |
 | `lenels2netbox` | LenelS2 NetBox | ✓ |   |   |   |   |   |
@@ -100,7 +104,7 @@ Skans covers a device across **four capability lanes** — and cert-deploy is on
 | `opengear` | Opengear | ✓ | ✓ |   |   |   |   |
 | `opnsense` | OPNsense | ✓ |   |   |   |   |   |
 | `opto22` | Opto 22 | ✓ |   |   |   |   |   |
-| `paloalto` | Palo Alto | ✓ |   |   |   |   | ✓ |
+| `paloalto` | Palo Alto | ✓ | ✓ | ✓ |   | ✓ | ✓ |
 | `peplink` | Peplink | ✓ |   |   |   |   |   |
 | `pfsense` | pfSense | ✓ | ✓ |   |   |   |   |
 | `phoenixplcnext` | Phoenix PLCnext | ✓ | ✓ |   |   |   |   |
