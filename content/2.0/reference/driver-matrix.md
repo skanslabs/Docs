@@ -14,7 +14,7 @@ Skans covers a device across **four capability lanes** — and cert-deploy is on
 **Shipping is not the same as validated.** Eight cert-deploy drivers are proven on **real hardware** — Axis, 2N, Bosch, FS, Hanwha, ONVIF, Redfish, and UniFi. Another eight are proven **end-to-end on emulated devices** (Cisco CML / EVE-NG): the Cisco fleet — Catalyst 9000v switches, ASAv, IOS-XE routers, Nexus 9300v, and the Catalyst 9800-CL wireless controller — plus Aruba CX. The rest were authored from each vendor's official management API and adversarially cross-checked, still **device-pending**. See the [Driver validation status](/2.0/reference/driver-validation/) page for the exact per-driver × per-lane proof; pilot a spec-verified driver on one device first. *(The syslog ingest lane was also validated live on an emulated OPNsense firewall.)*
 :::
 
-**122 device drivers** — 120 cert-deploy · 75 credential-rotate · 10 NAC/802.1X · 1 SCEP · 14 firmware-read · 26 config-backup · 1 AP-LSC · 1 config-read (API) · 1 monitor-push.
+**123 device drivers** — 120 cert-deploy · 75 credential-rotate · 10 NAC/802.1X · 1 SCEP · 15 firmware-read · 26 config-backup · 1 AP-LSC · 2 config-read (API) · 2 monitor-push.
 
 > **A ✓ means the driver *implements* that lane** — its declared capability, read straight from the signed pack. It is **not** a claim that the lane has been validated on a device. For what's actually been **proven** per driver — hardware, emulation, or still spec-verified — see **[Driver validation status](/2.0/reference/driver-validation/)**, where most cells are honestly still 📋 spec-verified.
 
@@ -49,6 +49,7 @@ Skans covers a device across **four capability lanes** — and cert-deploy is on
 | `ciscoios` | Cisco IOS (classic) |   |   |   | ✓ |   |   |   |   |   |
 | `ciscoiosxe` | Cisco IOS-XE | ✓ | ✓ | ✓ |   | ✓ | ✓ |   |   |   |
 | `ciscoiosxr` | Cisco IOS-XR | ✓ |   |   |   |   | ✓ |   |   |   |
+| `ciscomeraki` | Cisco Meraki |   |   |   |   | ✓ |   |   | ✓ | ✓ |
 | `cisconxos` | Cisco NX-OS | ✓ | ✓ |   |   |   | ✓ |   |   |   |
 | `ciscowlc` | Cisco WLC | ✓ | ✓ |   |   |   | ✓ | ✓ |   |   |
 | `citrixadc` | Citrix ADC | ✓ | ✓ |   |   |   |   |   |   |   |

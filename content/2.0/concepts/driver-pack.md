@@ -14,14 +14,14 @@ This is the deep-dive on the isolation model. If you just want to enroll a devic
 
 The pack ships and versions **independently of the control plane**, on the same model as a Milestone device pack. The pack moves 4–6 times a year as vendors change; the control plane moves about once every year or two. Adding or fixing a vendor means shipping a new pack — **no control-plane rebuild, no redeploy**.
 
-That separation is enforced in the build, not just by convention. `Skans.ControlPlane` no longer references the drivers assembly at all: the old per-vendor driver map is gone, and the published control-plane binary contains **zero driver types**. On boot the control plane logs `mounted 122 driver(s)` from the versioned store — the drivers are loaded at runtime, never compiled in.
+That separation is enforced in the build, not just by convention. `Skans.ControlPlane` no longer references the drivers assembly at all: the old per-vendor driver map is gone, and the published control-plane binary contains **zero driver types**. On boot the control plane logs `mounted 123 driver(s)` from the versioned store — the drivers are loaded at runtime, never compiled in.
 
 ## What's in the pack — and what's actually proven
 
-The pack carries **122 vendor drivers across 16 device categories**. Be clear-eyed about validation depth:
+The pack carries **123 vendor drivers across 16 device categories**. Be clear-eyed about validation depth:
 
 ::: warning
-**122 drivers ship. 8 are validated on real hardware, and another 8 end-to-end on emulated devices.** The eight hardware-proven are **Axis, 2N, Bosch, Uniview/FS, Hanwha, ONVIF, Redfish, and UniFi**; the eight emulation-proven (Cisco CML / EVE-NG) are the **Cisco fleet** — Catalyst 9000v switches, ASAv, IOS-XE routers, Nexus 9300v, and the Catalyst 9800-CL wireless controller — plus **Aruba CX**. The rest were authored from each vendor's official management API and adversarially cross-checked, still **device-pending**. Don't treat a spec-verified driver as field-proven — pilot it on one device first.
+**123 drivers ship. 8 are validated on real hardware, and another 8 end-to-end on emulated devices.** The eight hardware-proven are **Axis, 2N, Bosch, Uniview/FS, Hanwha, ONVIF, Redfish, and UniFi**; the eight emulation-proven (Cisco CML / EVE-NG) are the **Cisco fleet** — Catalyst 9000v switches, ASAv, IOS-XE routers, Nexus 9300v, and the Catalyst 9800-CL wireless controller — plus **Aruba CX**. The rest were authored from each vendor's official management API and adversarially cross-checked, still **device-pending**. Don't treat a spec-verified driver as field-proven — pilot it on one device first.
 :::
 
 Of the 118, **69 also rotate the device's admin password** (drivers tagged for credential rotation). Coverage by category:
@@ -88,7 +88,7 @@ This was proven live: a real Axis camera at `192.168.102.41` enrolled end-to-end
 The pack's failure behavior is split deliberately:
 
 - **Boot fails open.** A missing, invalid, incompatible, or unsigned pack **never crashes the control plane.** It sets `DriversAvailable = false` with a reason and keeps running — the console stays up. (Proven: removing the active-version pointer left the control plane running.)
-- **Enroll fails closed.** With no valid pack, per-device enrollment **fails closed** — it returns an error, never a fake success. Restoring the pointer remounted all 122 drivers and enrollment resumed.
+- **Enroll fails closed.** With no valid pack, per-device enrollment **fails closed** — it returns an error, never a fake success. Restoring the pointer remounted all 123 drivers and enrollment resumed.
 
 ## Hot-reload without a restart
 

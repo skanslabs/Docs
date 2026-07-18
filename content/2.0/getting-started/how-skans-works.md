@@ -75,7 +75,7 @@ Classification is **OS-based, not port-based**. Skans reads what a device actual
 
 The knowledge of how to talk to each vendor's device lives in the **Skans Driver Pack** — a separately versioned, cryptographically signed artifact, on the same model as a Milestone device pack. Adding or fixing a vendor means shipping a **new pack**, not rebuilding the appliance.
 
-- **122 vendor drivers** ship today, spanning cameras and physical security, network gear, firewalls, servers/BMC, building automation, industrial PLCs, access control, and more.
+- **123 vendor drivers** ship today, spanning cameras and physical security, network gear, firewalls, servers/BMC, building automation, industrial PLCs, access control, and more.
 - **8 are validated against real hardware** end-to-end (Axis, 2N, Bosch, Uniview/FS, Hanwha, ONVIF, Redfish, UniFi). The rest are authored from each vendor's official management API and adversarially verified, with hardware validation pending.
 - When a device genuinely has no certificate API, the driver **says so with a clear error rather than faking success** — you secure the conduit (the switch or firewall in front of it) and monitor the device instead.
 

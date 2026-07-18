@@ -76,10 +76,10 @@ Design details worth knowing:
 
 ### 3. Device that can't self-enroll — vendor-driver push
 
-Most cameras, intercoms, and IoT gear can't enroll themselves at all. For these, a **vendor driver** reaches into the device's native management API, has the CA issue a leaf, **pushes and binds** it, and then **verifies on the wire** — it confirms the device is actually serving the **new certificate serial**, not "should work." The driver library is **CA-agnostic** and spans **122 vendors**.
+Most cameras, intercoms, and IoT gear can't enroll themselves at all. For these, a **vendor driver** reaches into the device's native management API, has the CA issue a leaf, **pushes and binds** it, and then **verifies on the wire** — it confirms the device is actually serving the **new certificate serial**, not "should work." The driver library is **CA-agnostic** and spans **123 vendors**.
 
 ::: warning
-**Honest coverage.** **Eight drivers are hardware-verified end to end** in the cert-push lane — five cameras (Axis, Hanwha, Bosch, 2N, FS/Uniview) plus ONVIF, Redfish, and UniFi — and **another eight are proven on emulated devices** in Cisco CML / EVE-NG (the Cisco fleet — Catalyst 9000v, ASAv, IOS-XE routers, Nexus 9300v, Catalyst 9800-CL — plus Aruba CX). The rest of the 122 are authored from each vendor's official API and **device-pending**. Don't treat all 122 as proven — see **[The driver pack](/2.0/concepts/driver-pack/)** and the [validation status](/2.0/reference/driver-validation/).
+**Honest coverage.** **Eight drivers are hardware-verified end to end** in the cert-push lane — five cameras (Axis, Hanwha, Bosch, 2N, FS/Uniview) plus ONVIF, Redfish, and UniFi — and **another eight are proven on emulated devices** in Cisco CML / EVE-NG (the Cisco fleet — Catalyst 9000v, ASAv, IOS-XE routers, Nexus 9300v, Catalyst 9800-CL — plus Aruba CX). The rest of the 123 are authored from each vendor's official API and **device-pending**. Don't treat all 123 as proven — see **[The driver pack](/2.0/concepts/driver-pack/)** and the [validation status](/2.0/reference/driver-validation/).
 :::
 
 Real hierarchy and algorithm constraints show up here and are handled honestly — for example, a **Bosch** RSA-2048 leaf overflows that device's URL-payload transport, so it needs an **EC template or a POST-body** rather than being forced through.
@@ -138,6 +138,6 @@ Called out plainly so you always know what's real:
 ## Next
 
 - **[Enroll a device →](/2.0/how-tos/enroll-a-device/)** — the operator flow for the agentless lanes
-- **[The driver pack →](/2.0/concepts/driver-pack/)** — how the 122 vendor drivers are signed, versioned, and sandboxed
+- **[The driver pack →](/2.0/concepts/driver-pack/)** — how the 123 vendor drivers are signed, versioned, and sandboxed
 - **[How Skans works →](/2.0/getting-started/how-skans-works/)** — where the CA fits in the whole appliance
 - **[NIST 800-171 / CMMC evidence →](/2.0/compliance/nist-cmmc-evidence/)** — the IA / SC controls this identity model supports (IA-5, SC-12, SC-13, SC-17)
