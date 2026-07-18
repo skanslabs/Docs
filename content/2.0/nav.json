@@ -156,6 +156,10 @@
         "slug": "reference/ports"
       },
       {
+        "title": "Sizing & storage",
+        "slug": "reference/sizing"
+      },
+      {
         "title": "Troubleshooting",
         "slug": "reference/troubleshooting"
       },

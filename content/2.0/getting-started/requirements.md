@@ -23,10 +23,12 @@ Skans is designed to run a whole enclave from **one modest box**. A single appli
 
 | Resource | Guidance |
 | --- | --- |
-| Memory | Plan for **~16 GB RAM** |
-| Storage | SSD; size for how much telemetry you retain (default retention is 365 days) |
-| CPU | Modern x86-64 server class |
+| Memory | **16 GB minimum, 32 GB+ recommended** — it's an all-in-one box, so plan RAM for the sum of AD, SQL, the search store, and the control plane |
+| Storage | SSD, sized to your retention window — see **[Sizing & storage](/2.0/reference/sizing/)** |
+| CPU | Modern x86-64 server class; 4 cores minimum, 8+ recommended |
 | Network | At least one NIC on the enclave segment; a second for management is convenient |
+
+For a full breakdown by device count and retention, see **[Sizing & storage](/2.0/reference/sizing/)**.
 
 ::: tip
 Sizing scales with device count and retention, not raw traffic — findings are correlated and bounded per device. The relational database stays tiny (it uses SQL Express, and real deployments sit far under its cap); the bulk of data lives in the on-box search store, which is why disk is the thing to plan around.
