@@ -87,7 +87,7 @@ The pack is signed with a **separate, off-appliance release key**, deliberately 
 
 ## The run model: always-on services
 
-Skans runs as a set of **always-on, supervised services** (they start at boot and restart on failure), not scheduled scripts. You interact with one console; underneath, separate least-privileged services handle the control plane, agent telemetry, agentless collection, the driver-host sandbox, and the job scheduler. The trusted core is one hardened process; the riskier surfaces (agent hub, driver host) are isolated. Platform pieces degrade gracefully — the console keeps working even if the monitoring store is down.
+Skans runs as a set of **always-on, supervised services** (they start at boot and restart on failure), not scheduled scripts. You interact with one console; underneath, separate least-privileged services handle the control plane, agent telemetry, agentless collection, and the driver-host sandbox, while periodic jobs (backups, feed syncs, drift checks) run in-process on internal timers. The trusted core is one hardened process; the riskier surfaces (agent hub, driver host) are isolated. Platform pieces degrade gracefully — the console keeps working even if the monitoring store is down.
 
 ## One box, or many
 

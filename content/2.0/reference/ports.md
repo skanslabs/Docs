@@ -57,6 +57,7 @@ These ports are named explicitly in the Skans service and architecture docs. The
 | Agent hub | **7326** | TCP / mTLS | Inbound (endpoint agents → appliance) | Windows-agent telemetry + command channel, authenticated with a per-agent AD CS certificate | `SkansAgentHub` |
 | Syslog | **514** | UDP | Inbound (devices → appliance) | Agentless log ingest from IoT / OT / network gear | `SkansCollector` |
 | SNMP trap | **162** | UDP | Inbound (devices → appliance) | Agentless trap ingest from devices | `SkansCollector` |
+| Skans MAB RADIUS | **11812** | UDP | Inbound (switch authenticators → appliance) | Built-in **MAC Authentication Bypass** RADIUS listener for camera / IoT admission — **opt-in** (`radius.mab.enabled`, off by default), deliberately off 1812 because Windows NPS owns the standard RADIUS port | `SkansCP` |
 | Internal core API | *loopback* | mTLS over named pipe / loopback | On-box only | Least-privileged workers ↔ the trusted core; no TCP port is exposed | core |
 
 ::: note
@@ -74,8 +75,8 @@ These services are shipped and named in the docs, but the source files give the 
 | Service | Port | Protocol | Direction (vs. appliance) | Purpose | Owning service |
 | --- | --- | --- | --- | --- | --- |
 | SNMP poll | 161 | UDP | Outbound (appliance → device) | Agentless polling of IoT / OT / network devices | `SkansCollector` |
-| RADIUS (auth) | 1812 | UDP | Inbound (switch authenticators → appliance) | 802.1X EAP-TLS admission | NPS |
-| RADIUS (accounting) | 1813 | UDP | Inbound (switch authenticators → appliance) | 802.1X session accounting | NPS |
+| RADIUS (auth) | 1812 | UDP | Inbound (switch authenticators → appliance) | 802.1X **EAP-TLS** (certificate) admission — this is **Windows NPS**, which owns the standard RADIUS port; Skans's own opt-in MAB listener sits on **11812** (first table) | NPS |
+| RADIUS (accounting) | 1813 | UDP | Inbound (switch authenticators → appliance) | 802.1X session accounting (Windows NPS) | NPS |
 | SCEP / NDES | 80 / 443 (IIS) | HTTP / HTTPS | Inbound (SCEP-native devices → appliance) | Certificate enrollment at path `/certsrv/mscep` | AD CS / NDES |
 | DNS | 53 | UDP + TCP | Inbound (enclave → appliance) | AD DS–integrated DNS with a forwarder | AD DS |
 | Search store (OpenSearch 3.7) | 9200 | TCP / HTTPS | **Loopback only (127.0.0.1)** | On-box telemetry / log store; never network-exposed | `SkansOpenSearch` |

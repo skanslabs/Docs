@@ -10,13 +10,18 @@ This is the current-release summary for **Skans 2.0** — the first shipping rel
 **How to read the tags.** **Shipped** means the capability is built and proven live on the flagship appliance. **Partial** means it ships with a deliberate, stated boundary (a manual step, a hand-off, or hardware still pending). **Preview** means design-stage or roadmap — not something you can turn on today.
 :::
 
+## Recent releases
+
+- **2026-07-17 — Agent v0.4.0: security hardening + verified self-update.** An agent's identity is now bound to its **authenticated mTLS certificate** — never to anything the client reports about itself — and signed command sets are bound to the specific target agent, so a command captured from one agent cannot be replayed to another. Self-update verifies every release (SHA-256 + Authenticode) before a staged swap with rollback, and v0.4.0 rolled out fleet-wide through that channel. Alongside it: driver packs **2026.7.16e** (Cisco Catalyst 9200/9300/9500 switches + ASA firewalls) and the **2026.7.17** series (Cisco FTD full lanes — certificate renewal, API config snapshot, and driver-automated telemetry configuration — plus ASA monitor-push, IOS-XR, and Catalyst 9800 AP-LSC).
+- **2026-07-16 — Alert Rules & Notifications.** The **`/alerting`** console page: alert-rule management, suppressions with a recorded-justification guardrail on compliance-tagged rules, snooze with expiry, escalation / renotify, and per-channel notification delivery health. See **[Alerts & monitoring](/2.0/monitoring/alerts/)**.
+
 ## Platform & runtime — Shipped
 
 The flagship is a **single self-contained Windows Server appliance** (an open-source Linux SKU is the secondary flavor), sized for one site of **up to ~5,000 devices** (SRS PERF-01). Everything runs on the enclave — no runtime internet dependency.
 
 - **Runtime:** .NET 10; an ASP.NET Core + Blazor console bound on **:7328** (HTTPS).
 - **Stores:** SQL Server / SQL Express holds control-plane state; OpenSearch holds telemetry, metrics, events, inventory, and vulnerabilities. Volume lives in OpenSearch, which is why the relational DB stays tiny.
-- **Run model:** always-on, supervised Windows services — `SkansControlPlane`, `SkansAgentHub`, `SkansCollector`, `SkansAgent`, `SkansScheduler` — that start at boot and restart on failure, not scheduled scripts.
+- **Run model:** always-on, supervised Windows services — `SkansControlPlane`, `SkansAgentHub`, `SkansCollector`, `SkansAgent` — that start at boot and restart on failure, not scheduled scripts. Periodic jobs (backups, feed sync, drift checks) run **in-process inside the control plane** on internal timers; there is no separate scheduler service.
 - **Agent transport:** mutual-TLS REST on **:7326**. The agent hub holds no signing key; the trusted core signs commands over a local pipe.
 
 See **[Ports & endpoints](/2.0/reference/ports/)** for the full list.
@@ -76,12 +81,12 @@ The backup requirement is **get data off the source**. That ships:
 
 See **[Backup](/2.0/how-tos/backup/)**.
 
-## Credential vault — Shipped (DR escrow deferred)
+## Credential vault — Shipped
 
 Device and service credentials live only in an encrypted vault — never plaintext JSON. It uses **envelope encryption**: a per-secret **AES-256-GCM** data key wrapped by a **TPM-held KEK** (CNG Platform Crypto Provider, non-exportable), bound to additional authenticated data, with **online KEK rotation**, migration re-encrypt, and decrypt-auditing. This replaces DPAPI null-entropy storage. Device secrets stay reversibly encrypted because they must be replayed to the device.
 
-::: warning
-**DR / escrow of the vault is a deferred stub.** The vault itself ships; recovering it off-box (via PIV / age) is roadmap — don't count vault DR escrow as complete.
+::: note
+**Vault DR escrow ships and is drilled.** `--vault-escrow` wraps every key-encryption key to an operator-held **RSA-4096 recovery key** and ships the escrow document with the off-box backup set; `--vault-recover` re-seals those keys under a rebuilt box's own TPM — drilled live across two appliances with different TPMs. The open item is narrower: **hardware (PIV/FIDO2) custody of the recovery key** — today the operator keeps the recovery private key off-box themselves.
 :::
 
 See **[Manage credentials](/2.0/how-tos/manage-credentials/)**.
@@ -140,10 +145,10 @@ Design-stage or in-flight — **not** something you can enable in this release:
 
 | Item | Status |
 | --- | --- |
-| **Core + Edge distributed multi-site tier** | Design-stage. The shipped flagship is the single appliance (up to ~5,000 devices); no committed per-Edge device numbers. See **[Distributed design](/2.0/concepts/distributed/)**. |
+| **Core + Edge distributed multi-site tier** | In-flight. The foundational layers — the versioned mTLS wire protocol, Edge enrollment, and the store-and-forward relay — are built and lab-verified on a two-box setup; summarize-at-Edge, boundary groups, and HA edge pools remain design-stage. The shipped flagship is the single appliance (up to ~5,000 devices); no committed per-Edge device numbers. See **[Distributed design](/2.0/concepts/distributed/)**. |
 | **Double-click agent MSI / EXE wizard** | Roadmap. Today the agent ships via GPO / SYSVOL as an Authenticode-signed service. |
 | **FIDO2 / YubiKey FIPS MFA** | Built, hardware pending — available-soon. |
-| **Vault DR / escrow** | Deferred stub (PIV / age). |
+| **Vault recovery-key hardware custody** | Roadmap. Vault DR escrow itself is **shipped and drilled cross-box**; the open item is re-wrapping the operator recovery key to a PIV/FIDO2 hardware token. |
 | **CMVP-validated FIPS module pinning** | Roadmap; required for formal FIPS validation. |
 
 ## Next

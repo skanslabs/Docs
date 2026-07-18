@@ -35,7 +35,7 @@ The ring GPO/OU scaffolding is shipped and verified (`installer/220-patch-rings.
 
 ## 2. Offline compliance scan (missing KBs)
 
-Each managed host is scanned against Microsoft's **offline `wsusscn2.cab`** catalog using the WUA COM API — no internet required — to produce a **missing-KB report**. This runs weekly (**Sunday 3am**) as the `SkansPatchScan` job inside the always-on `SkansScheduler` service.
+Each managed host is scanned against Microsoft's **offline `wsusscn2.cab`** catalog using the WUA COM API — no internet required — to produce a **missing-KB report**. This runs weekly (**Sunday 3am**) as the `SkansPatchScan` job on the in-process periodic-jobs engine inside `SkansCP`.
 
 Open a Windows device's detail page and check its **Updates** tab. It reads the distributed offline catalog and shows which KBs the host is missing, so you can see enclave-wide patch posture without any endpoint calling home.
 

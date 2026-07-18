@@ -49,6 +49,16 @@ The model is **state-based plus count-growth**:
 A specific **failed-logon (4625) brute-force** count-growth rule is being wired up as part of the current data-plane work. The signal it needs — the agent pushing 4625 as SYSTEM within seconds — already flows today; treat the packaged brute-force *rule* as near-term rather than long-proven.
 :::
 
+## Alert rules & notifications: the /alerting console
+
+The engine above ships with an operator console over it — **Alerting** (`/alerting`), added 2026-07-16 and gated by the **`alert.manage`** capability:
+
+- **Rule management** — enable, disable, and tune the packaged rules from the console. A save goes live on the engine's next evaluation cycle; no service restart.
+- **Suppressions with a compliance guardrail** — a suppression silences a rule for a host pattern for a bounded window. If the rule is **compliance-tagged** (for example a rule that evidences **NIST AU-6**), the console **requires a written justification** before it accepts the suppression. The record — who, why, until when — is written to the audit log as an explicit **risk acceptance** and surfaced to the compliance view, so a silenced control is never an invisible gap.
+- **Snooze with expiry** — a snooze always carries an expiry; nothing gets silenced indefinitely by accident.
+- **Escalation / renotify** — an unacknowledged alert can re-notify on a configured interval instead of being sent once and forgotten.
+- **Delivery health** — per-channel notification delivery health (did the SMTP relay or webhook actually accept the last dispatch), so you learn about a broken channel from the console, not from a missed incident.
+
 ## The console reads the cache, not the device
 
 In the current data-plane design, opening a device page does **not** run a live query against the device. The console reads a **materialized store** — a compact, grid-queryable core row plus one rich rollup document per device — in a single fast query, and shows you **"updated Xs ago"** with a **stale badge** and a bounded **Refresh now** that recollects just that one host on demand. This is what lets Device Detail load quickly without hanging on an unreachable box, and it removes the last on-demand-PowerShell holdout.

@@ -12,7 +12,7 @@ The requirement Skans satisfies is **getting data off the source**. Automated **
 
 ## What Skans backs up
 
-Six lanes run on their own schedule inside the always-on scheduler service. Each captures a different store, ships it off-box, and encrypts it before it leaves the appliance.
+Six lanes run on their own schedule on the in-process periodic-jobs engine inside the always-on control-plane service. Each captures a different store, ships it off-box, and encrypts it before it leaves the appliance.
 
 | Lane | What it captures | Off-box | Encrypted |
 | --- | --- | --- | --- |
@@ -78,8 +78,8 @@ Restore is **manual and admin-run**. The database and telemetry paths have been 
 - **Directory** — rebuild the DC from the encrypted system-state media using the standard AD restore procedure.
 - **Encrypted artifacts on a rebuilt box** — the AES-256 master key is DPAPI-sealed to the *original* appliance, so a **standby box must be given the escrowed key before it can decrypt** anything shipped to it.
 
-::: warning
-**Vault DR is partial.** Skans escrows specific critical secrets (so a rebuilt box can decrypt without the live vault) and the vault snapshot in the backup set is explicitly **best-effort**. The credential vault itself is fully built, but **full disaster-recovery escrow of the vault/KEK is a deferred, work-in-progress item** — don't assume the entire vault is guaranteed recoverable off-box. See **[Manage credentials](/2.0/how-tos/manage-credentials/)**.
+::: note
+**Vault DR escrow is built and drilled.** The vault's key-encryption keys are escrowed to an operator-held **RSA-4096 recovery key**; the escrow document ships with the off-box backup set (it is useless without the recovery key), and a rebuilt box recovers the vault with `--vault-recover` — drilled live across two appliances with different TPMs. The vault snapshot in the backup set remains **best-effort**, and the open item is hardware (PIV/FIDO2) custody of the recovery key, which today the operator keeps off-box themselves. See **[Manage credentials](/2.0/how-tos/manage-credentials/)**.
 :::
 
 ## Optional: ship-to-standby database HA (Tier-2, customer-owned)
@@ -92,7 +92,7 @@ The **shipped default** is the daily off-box `.bak` with manual restore describe
 
 ## Under the hood (for admins)
 
-- **Run model** — every recurring backup runs on an internal timer inside the always-on **SkansScheduler** Windows service (the old per-task Windows Task Scheduler jobs were retired): directory system-state ~1:30am, database ~2am, the backup set and network configs ~2:30am, DC drift ~3:45am.
+- **Run model** — every recurring backup runs on an internal timer on the **in-process periodic-jobs engine inside the always-on control-plane service** (the old per-task Windows Task Scheduler jobs — and the interim separate scheduler service — were both retired): directory system-state ~1:30am, database ~2am, the backup set and network configs ~2:30am, DC drift ~3:45am.
 - **Encryption** — each artifact is AES-256-encrypted before it leaves the box; the plaintext staging file is ACL'd and deleted in a `finally`. The `secrets` and backup directories are ACL-locked to SYSTEM + Administrators, and DR operations are serialized by a machine-wide mutex. *Honest caveat:* the backup cipher is currently AES-256-**CBC** (no AEAD); directory ACLs close the practical tamper vector, and a move to AES-GCM is a tracked hardening item.
 - **Why encrypt the `.bak` ourselves** — SQL Express does not support `WITH ENCRYPTION` / `WITH COMPRESSION` (it errors with Msg 1844), so Skans encrypts the backup file itself rather than relying on the engine.
 

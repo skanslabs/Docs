@@ -150,8 +150,9 @@ There is **no shipped double-click MSI installer** for the Windows agent. It's d
 | **SkansCollector** | SNMP/syslog, ICS collect, alert engine | — |
 | **SkansOpenSearch** | Data store | — |
 | **SkansVault** | Secrets store | — |
-| **SkansScheduler** | Periodic jobs (internal timers) | — |
 | **SkansDashboards** | Dashboards | — |
+
+Periodic jobs (backups, scans, feed syncs) run **in-process inside SkansCP** on internal timers — there is no separate scheduler service to look for.
 
 ::: note
 **SkansAgent** runs on your managed Windows endpoints — **not** on the appliance — so you won't see it in the appliance's service list. Full port list: **[Ports](/2.0/reference/ports/)**.

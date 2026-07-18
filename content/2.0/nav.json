@@ -53,6 +53,10 @@
         "slug": "how-tos/enroll-a-device"
       },
       {
+        "title": "Scan & secure a subnet",
+        "slug": "how-tos/scan-and-secure"
+      },
+      {
         "title": "Install the Windows agent",
         "slug": "how-tos/install-the-agent"
       },
@@ -67,6 +71,10 @@
       {
         "title": "Backup & recovery",
         "slug": "how-tos/backup"
+      },
+      {
+        "title": "Restore from backup",
+        "slug": "how-tos/restore-from-backup"
       },
       {
         "title": "Manage credentials",
@@ -122,6 +130,14 @@
       {
         "title": "Roles & RBAC",
         "slug": "reference/roles-and-rbac"
+      },
+      {
+        "title": "Universal search & command bar",
+        "slug": "reference/universal-search"
+      },
+      {
+        "title": "Topology map",
+        "slug": "reference/topology-map"
       },
       {
         "title": "Device support matrix",

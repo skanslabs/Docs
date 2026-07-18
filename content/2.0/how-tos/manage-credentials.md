@@ -8,15 +8,15 @@ Every device and service credential Skans holds — a camera's management login,
 
 ## Enter a credential (zero-exposure)
 
-Open the console **Credentials editor** and add the credential for the target device or service. Two kinds:
+Open the console **Passwords** page (`/passwords`) — the vault's credential editor — and add the credential for the target device or service. Two kinds:
 
 - **Device credentials** — the management login Skans uses to reach a device (issue and bind its certificate, read health).
 - **API / controller credentials** — a service or controller cred, for example the read-only credential for a UniFi network controller.
 
-When you save, the value is written **straight into the SQL vault, encrypted**, and stored as an `[SKV2]` envelope. It is never echoed back on entry and never staged in a file — that's the zero-exposure path. From then on Skans uses the credential internally; surfacing a stored value again is a separate, **RBAC-gated reveal** action that is itself audited.
+When you save, the value is written **straight into the SQL vault, encrypted**, and stored as an `[SKV2]` envelope. It is never echoed back on entry and never staged in a file — that's the zero-exposure path. From then on Skans uses the credential internally; surfacing a stored value again is a separate reveal action gated by the **`vault.reveal`** capability, and every reveal is itself audited.
 
 ::: warning
-**The hard rule: credentials live only in the vault.** Never paste a device or service password into a config file, script, or JSON. Enter it through the console Credentials editor so it stays encrypted at rest. The shipped appliance is confirmed free of plaintext credential files.
+**The hard rule: credentials live only in the vault.** Never paste a device or service password into a config file, script, or JSON. Enter it through the console Passwords page so it stays encrypted at rest. The shipped appliance is confirmed free of plaintext credential files.
 :::
 
 ## How it's protected
@@ -75,6 +75,13 @@ Skans.ControlPlane.exe --vault-rotate-kek
 
 # Rotate only the wrapping key (new TPM key / new DPAPI entropy); ciphertexts untouched
 Skans.ControlPlane.exe --vault-rewrap
+
+# DR escrow: wrap every KEK to the operator-held RSA-4096 recovery key
+# (first run mints the recovery keypair; KEK rotation refreshes the escrow automatically)
+Skans.ControlPlane.exe --vault-escrow
+
+# On a rebuilt/standby box: unwrap the escrowed KEKs and re-seal them under THIS box's TPM/DPAPI
+Skans.ControlPlane.exe --vault-recover <escrow.json> <recovery.pem>
 ```
 
 Recommended cadence:
@@ -90,10 +97,16 @@ Every decrypt is audited. Interactive console actions (reveal, set credentials, 
 **Planned — credential-access history screen.** Decrypt events are audited and queryable **now** (SQL + OpenSearch), but a console screen to browse credential-access history is not yet shipped.
 :::
 
-## Disaster recovery — read this
+## Disaster recovery — the vault travels via escrow
 
-::: warning
-**Deferred — the vault does not yet travel to new hardware.** DR escrow of the vault is a roadmap stub. A standby or rebuilt appliance has a different TPM / DPAPI context and **cannot unwrap the primary's KEK**. If you lose the appliance, treat it as a **re-credential event**: on the rebuilt box, re-enter (or rotate) each device's credential from your credential source. Planned work will escrow the sealed KEK to a PIV/FIPS token or a recovery secret so the vault can be recovered — until then, don't assume the vault survives a box loss.
+A standby or rebuilt appliance has a different TPM / DPAPI context and **cannot unwrap the primary's KEK on its own** — the escrow is the path back, and it is **built and drilled live across two appliances with different TPMs**:
+
+1. **`--vault-escrow`** wraps every KEK (active and retiring) to an operator-held **RSA-4096 recovery key**. The first run mints the keypair: the public key stays on-box so KEK rotation can re-escrow unattended; the private key is written once for the operator to take **off-box custody** (password vault or sealed USB, then delete it from the box — `--vault-status` warns while it remains). The escrow document ships with the off-box backup set, and it is useless without the recovery key.
+2. **`--vault-rotate-kek` re-escrows automatically**, so a rotation can never silently strand the escrow at a retired KEK.
+3. On the replacement box, **`--vault-recover`** unwraps each KEK and seals it under *that* box's TPM / DPAPI under its original key id. Run it **before** creating new secrets there, then restore the database — the stored credentials open again.
+
+::: note
+**Open item — hardware custody of the recovery key.** Whoever holds the escrow document *plus* the recovery key can unwrap the KEKs, so the private key must stay off-box under operator control. Re-wrapping that recovery secret to a PIV/FIDO2 hardware token is the remaining enhancement — today custody is an operator-held file, not a hardware token.
 :::
 
 ## What the vault does and doesn't defend

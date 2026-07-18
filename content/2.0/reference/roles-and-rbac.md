@@ -8,12 +8,12 @@ Skans enforces **least privilege** in the console with a **capability-based RBAC
 
 ## The model: capabilities, not hard-coded roles
 
-Access is expressed as **capability claims** (`cap:*`), not a fixed enum of what each role may do. The backend owns capability roles and a role API; the console maps a signed-in user's capability claims to **both** what appears in the navigation **and** which actions are available. A backend-to-frontend audit counted roughly **210 capabilities** in the model, so grants stay fine-grained rather than all-or-nothing.
+Access is expressed as **capability claims** (`cap:*`), not a fixed enum of what each role may do. The backend owns capability roles and a role API; the console maps a signed-in user's capability claims to **both** what appears in the navigation **and** which actions are available. The model defines **18 fine-grained capabilities** — from `dashboard.view` and `device.deploy` through `vault.reveal` to the break-glass `dr.restore` — so a role is a small, auditable bundle of exactly what the job needs, never all-or-nothing.
 
 This is the FR-U02 requirement — *enforce role-based access / least privilege* — and it maps to **NIST AC-6** (least privilege). Least privilege is the governing principle here: a role gets exactly the capabilities its job needs and nothing else.
 
 ::: note
-The appliance is **single-tenant** — it *is* the customer's directory and CA for one enclave. There is no separate provider portal or provider tenant. Instead there are six roles on one console; two of them (Admin/Engineer and Technician) are **cross-cutting** and may be held by Skans field staff **or** the customer's own people, while the other four are customer-organization roles.
+The appliance is **single-tenant** — it *is* the customer's directory and CA for one enclave. There is no separate provider portal or provider tenant. Instead there are six roles on one console; two of them (Admin and Technician) are **cross-cutting** and may be held by Skans field staff **or** the customer's own people, while the other four are customer-organization roles.
 :::
 
 ## Six roles, one console
@@ -22,11 +22,11 @@ Each role resolves to a distinct **lens** — the same console, scoped to what t
 
 | Role | Held by | What the lens gives them |
 | --- | --- | --- |
-| **Admin / Engineer** | Skans field staff or customer IT | Everything. All actions audited. |
-| **Technician** | Skans field staff or customer staff | Guided install / replace / diagnose and support-bundle capture. **No** PKI, AD, roles, or hardening changes. |
+| **Admin** | Skans field staff or customer IT | Everything — including the **break-glass `dr.restore`** capability for destructive in-place restore, which only Admin holds. All actions audited. |
+| **Technician** | Skans field staff or customer staff | Guided install / replace / diagnose and support-bundle capture; may **reveal stored device credentials** (`vault.reveal`, every reveal audited) — reading back a device password on site is the job. **No** PKI, AD, roles, or hardening changes. |
 | **Manager** | Customer org | Enclave-at-a-glance plus **approvals** — patch-ring promotion, maintenance windows, firmware push, org user provisioning (gated by `patch.approve`). |
 | **Supervisor** | Customer org | Scoped to an assigned area / segment; acknowledge alerts **in scope**. |
-| **User** | Customer org | See their own area; self-service **report / flag** (which creates a request, not a change). |
+| **Operator** | Customer org | Day-to-day view of the estate; acknowledge alerts. Self-service **report / flag** creates a request, not a change. |
 | **Auditor** | Customer org | Read-only NIST posture and evidence; review / attest; export signed evidence. **No** mutating action. |
 
 In the design spec each role's access to a surface reads as one of three states: **full**, **partial (scoped read)**, or **hidden**. Manage roles and assignments from the console under **System → Access (Identity & RBAC)** — capability grants live with the role, so adding a person to a role gives them exactly that role's claims.
@@ -39,7 +39,7 @@ The intended enforcement model (FR-UI-02) gates access at three layers so that v
 2. **Per control** — each mutating control is wrapped in an `AuthorizeView` keyed on its own **action capability**, so a page you can *read* may still hide the buttons you can't *use*.
 3. **Server-side re-check** — the server re-checks the capability when the action runs. The design rule is blunt: **"a hidden button is not a control — hiding is not enforcing."**
 
-For example, `cap:device.manage` gates inline cell editing (Location / Tier / Vendor) in the Devices grid and audits the change, while `patch.approve` gates the Manager approvals surface.
+For example, `cap:device.manage` gates inline cell editing (Location / Tier / Vendor) in the Devices grid and audits the change, while `patch.approve` gates the Manager approvals surface. Two capabilities deserve a call-out: **`vault.reveal`** gates revealing a stored credential in plaintext (held by Technician — the control is the audit trail on every reveal, not withholding the capability from field staff whose job needs it), and **`dr.restore`** gates destructive in-place restore (SQL / CA / AD) — a **break-glass, Admin-only** grant that sits above `policy.change`.
 
 ::: warning
 Server-side enforcement is **being rolled out across the console, not uniformly shipped on every page yet.** The backend capability RBAC (role API and access controls) is shipped and green, and the model above is the target for every route — but historically some pages *rendered* the gate without *enforcing* it. Treat per-route server-side enforcement as the intended, in-progress model; capability-gating of the Users / Groups / Roles surfaces is where that gap is being closed first.
