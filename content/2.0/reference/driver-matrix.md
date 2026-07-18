@@ -14,138 +14,142 @@ Skans covers a device across **four capability lanes** — and cert-deploy is on
 **Shipping is not the same as validated.** Eight cert-deploy drivers are proven on **real hardware** — Axis, 2N, Bosch, FS, Hanwha, ONVIF, Redfish, and UniFi. Another eight are proven **end-to-end on emulated devices** (Cisco CML / EVE-NG): the Cisco fleet — Catalyst 9000v switches, ASAv, IOS-XE routers, Nexus 9300v, and the Catalyst 9800-CL wireless controller — plus Aruba CX. The rest were authored from each vendor's official management API and adversarially cross-checked, still **device-pending**. See the [Driver validation status](/2.0/reference/driver-validation/) page for the exact per-driver × per-lane proof; pilot a spec-verified driver on one device first. *(The syslog ingest lane was also validated live on an emulated OPNsense firewall.)*
 :::
 
-**122 device drivers** — 120 cert-deploy · 75 credential-rotate · 10 NAC/802.1X · 1 SCEP · 13 firmware-read · 26 config-backup.
+**122 device drivers** — 120 cert-deploy · 75 credential-rotate · 10 NAC/802.1X · 1 SCEP · 14 firmware-read · 26 config-backup · 1 AP-LSC · 1 config-read (API) · 1 monitor-push.
 
 > **A ✓ means the driver *implements* that lane** — its declared capability, read straight from the signed pack. It is **not** a claim that the lane has been validated on a device. For what's actually been **proven** per driver — hardware, emulation, or still spec-verified — see **[Driver validation status](/2.0/reference/driver-validation/)**, where most cells are honestly still 📋 spec-verified.
 
-| Vendor | Driver | Cert-deploy | Rotate creds | NAC (802.1X) | SCEP | Firmware | Config-backup |
-|---|---|:--:|:--:|:--:|:--:|:--:|:--:|
-| `a10` | A10 | ✓ | ✓ |   |   |   |   |
-| `acti` | ACTi | ✓ | ✓ |   |   |   |   |
-| `advantech` | Advantech | ✓ |   |   |   |   |   |
-| `apc` | APC | ✓ | ✓ |   |   |   |   |
-| `arista` | Arista | ✓ | ✓ |   |   |   | ✓ |
-| `arubacx` | Aruba CX | ✓ | ✓ | ✓ |   |   | ✓ |
-| `audiocodes` | AudioCodes | ✓ |   |   |   |   |   |
-| `avaya` | Avaya | ✓ | ✓ |   |   |   |   |
-| `avigilon` | Avigilon | ✓ |   |   |   |   |   |
-| `avigilonacm` | Avigilon ACM | ✓ |   |   |   |   |   |
-| `axis` | Axis | ✓ | ✓ |   |   | ✓ |   |
-| `barracuda` | Barracuda | ✓ |   |   |   |   |   |
-| `beckhofftwincat` | Beckhoff TwinCAT | ✓ |   |   |   |   |   |
-| `belimo` | Belimo | ✓ |   |   |   |   |   |
-| `bosch` | Bosch | ✓ | ✓ |   |   | ✓ |   |
-| `boschintrusion` | Bosch Intrusion | ✓ |   |   |   |   |   |
-| `brocadeicx` | Brocade ICX | ✓ | ✓ |   |   |   | ✓ |
-| `brother` | Brother | ✓ |   |   |   |   |   |
-| `cambium` | Cambium | ✓ | ✓ |   |   |   |   |
-| `canon` | Canon | ✓ |   |   |   |   |   |
-| `checkpoint` | Check Point | ✓ |   |   |   |   |   |
-| `cisco9200` | Cisco Catalyst 9200 | ✓ | ✓ | ✓ |   | ✓ | ✓ |
-| `cisco9300` | Cisco Catalyst 9300 | ✓ | ✓ | ✓ |   | ✓ | ✓ |
-| `cisco9500` | Cisco Catalyst 9500 | ✓ | ✓ | ✓ |   | ✓ | ✓ |
-| `ciscoasa` | Cisco ASA | ✓ | ✓ | ✓ |   | ✓ | ✓ |
-| `ciscoftd` | Cisco FTD | ✓ |   |   |   |   |   |
-| `ciscoios` | Cisco IOS (classic) |   |   |   | ✓ |   |   |
-| `ciscoiosxe` | Cisco IOS-XE | ✓ | ✓ | ✓ |   | ✓ | ✓ |
-| `ciscoiosxr` | Cisco IOS-XR | ✓ |   |   |   |   | ✓ |
-| `cisconxos` | Cisco NX-OS | ✓ | ✓ |   |   |   | ✓ |
-| `ciscowlc` | Cisco WLC | ✓ | ✓ |   |   |   | ✓ |
-| `citrixadc` | Citrix ADC | ✓ | ✓ |   |   |   |   |
-| `comware` | Comware | ✓ | ✓ |   |   |   | ✓ |
-| `cradlepoint` | Cradlepoint | ✓ |   |   |   |   |   |
-| `crestron` | Crestron | ✓ | ✓ |   |   |   |   |
-| `cyberpower` | CyberPower | ✓ | ✓ |   |   |   |   |
-| `dahua` | Dahua | ✓ | ✓ |   |   |   |   |
-| `dellome` | Dell OpenManage | ✓ | ✓ |   |   |   |   |
-| `dellos10` | Dell OS10 | ✓ | ✓ |   |   |   | ✓ |
-| `dellpowerstore` | Dell PowerStore | ✓ | ✓ |   |   |   |   |
-| `dellunity` | Dell Unity | ✓ | ✓ |   |   |   |   |
-| `distech` | Distech Controls | ✓ | ✓ |   |   |   |   |
-| `draytek` | DrayTek | ✓ |   |   |   |   |   |
-| `eaton` | Eaton | ✓ |   |   |   |   |   |
-| `edgeos` | EdgeOS | ✓ | ✓ |   |   |   | ✓ |
-| `emersondeltav` | Emerson DeltaV | ✓ |   |   |   |   |   |
-| `emersonpac` | Emerson PACSystems | ✓ |   |   |   |   |   |
-| `extreme` | Extreme | ✓ | ✓ |   |   |   | ✓ |
-| `f5` | F5 | ✓ | ✓ |   |   |   |   |
-| `fortinet` | Fortinet | ✓ | ✓ | ✓ |   | ✓ | ✓ |
-| `fs` | FS | ✓ | ✓ |   |   | ✓ |   |
-| `geovision` | GeoVision | ✓ |   |   |   |   |   |
-| `grandstream` | Grandstream | ✓ | ✓ |   |   |   |   |
-| `hanwha` | Hanwha | ✓ | ✓ |   |   | ✓ |   |
-| `hikvision` | Hikvision | ✓ | ✓ |   |   |   |   |
-| `hirschmann` | Hirschmann | ✓ | ✓ |   |   |   | ✓ |
-| `hitachivsp` | Hitachi VSP | ✓ | ✓ |   |   |   |   |
-| `honeywell` | Honeywell | ✓ |   |   |   |   |   |
-| `hpealletra` | HPE Alletra 5000/6000 & Nimble (NimbleOS) | ✓ | ✓ |   |   |   |   |
-| `hpeoneview` | HPE OneView | ✓ | ✓ |   |   |   |   |
-| `hpeprimera` | HPE Primera | ✓ |   |   |   |   |   |
-| `hpprinter` | HP Printer | ✓ |   |   |   |   |   |
-| `huawei` | Huawei | ✓ | ✓ |   |   |   | ✓ |
-| `ibmstorage` | IBM Storage | ✓ | ✓ |   |   |   |   |
-| `ifm` | ifm | ✓ | ✓ |   |   |   |   |
-| `infinidat` | Infinidat | ✓ | ✓ |   |   |   |   |
-| `ipro` | i-PRO | ✓ | ✓ |   |   |   |   |
-| `jcimetasys` | JCI Metasys | ✓ |   |   |   |   |   |
-| `juniper` | Juniper | ✓ | ✓ | ✓ |   | ✓ | ✓ |
-| `kemp` | Kemp | ✓ | ✓ |   |   |   |   |
-| `konica` | Konica Minolta | ✓ |   |   |   |   |   |
-| `lenels2netbox` | LenelS2 NetBox | ✓ |   |   |   |   |   |
-| `mercury` | Mercury Security | ✓ |   |   |   |   |   |
-| `mikrotik` | MikroTik | ✓ | ✓ |   |   |   | ✓ |
-| `mitsubishimelsec` | Mitsubishi MELSEC | ✓ |   |   |   |   |   |
-| `moxa` | Moxa | ✓ | ✓ |   |   |   |   |
-| `netapp` | NetApp | ✓ | ✓ |   |   |   |   |
-| `netgear` | Netgear | ✓ | ✓ |   |   |   | ✓ |
-| `nutanix` | Nutanix | ✓ |   |   |   |   |   |
-| `omronnx` | Omron NX | ✓ |   |   |   |   |   |
-| `onvif` | ONVIF | ✓ | ✓ |   |   |   |   |
-| `opengear` | Opengear | ✓ | ✓ |   |   |   |   |
-| `opnsense` | OPNsense | ✓ |   |   |   |   |   |
-| `opto22` | Opto 22 | ✓ |   |   |   |   |   |
-| `paloalto` | Palo Alto | ✓ | ✓ | ✓ |   | ✓ | ✓ |
-| `peplink` | Peplink | ✓ |   |   |   |   |   |
-| `pfsense` | pfSense | ✓ | ✓ |   |   |   |   |
-| `phoenixplcnext` | Phoenix PLCnext | ✓ | ✓ |   |   |   |   |
-| `poly` | Poly | ✓ |   |   |   |   |   |
-| `powerscale` | Dell PowerScale | ✓ | ✓ |   |   |   |   |
-| `proxmox` | Proxmox | ✓ | ✓ |   |   |   |   |
-| `purestorage` | Pure Storage | ✓ | ✓ |   |   |   |   |
-| `qnap` | QNAP | ✓ |   |   |   |   |   |
-| `radware` | Radware | ✓ | ✓ |   |   |   |   |
-| `raritan` | Raritan | ✓ | ✓ |   |   |   |   |
-| `redfish` | Redfish (iDRAC/iLO) | ✓ | ✓ |   |   |   |   |
-| `ricoh` | Ricoh | ✓ |   |   |   |   |   |
-| `rockwellstratix` | Rockwell Stratix | ✓ | ✓ |   |   |   |   |
-| `ruckus` | Ruckus | ✓ |   |   |   |   | ✓ |
-| `servertech` | Server Technology | ✓ | ✓ |   |   |   |   |
-| `siemensdesigo` | Siemens Desigo | ✓ |   |   |   |   |   |
-| `siemenss7` | Siemens S7 | ✓ | ✓ |   |   |   |   |
-| `siemenss71200` | Siemens S7-1200 | ✓ | ✓ |   |   |   |   |
-| `sonicwall` | SonicWall | ✓ |   |   |   |   | ✓ |
-| `sophos` | Sophos | ✓ |   |   |   |   |   |
-| `synology` | Synology | ✓ | ✓ |   |   |   |   |
-| `tridium` | Tridium Niagara | ✓ |   |   |   |   |   |
-| `tripplite` | Tripp Lite | ✓ | ✓ |   |   |   |   |
-| `truenas` | TrueNAS | ✓ | ✓ |   |   |   |   |
-| `twon` | 2N | ✓ |   |   |   | ✓ |   |
-| `unifi` | UniFi | ✓ |   | ✓ |   |   | ✓ |
-| `uniview` | Uniview | ✓ | ✓ |   |   |   |   |
-| `vertiv` | Vertiv | ✓ | ✓ |   |   |   |   |
-| `vivotek` | Vivotek |   | ✓ |   |   |   |   |
-| `vmwareesxi` | VMware ESXi | ✓ | ✓ |   |   |   |   |
-| `vmwarensx` | VMware NSX | ✓ | ✓ |   |   |   |   |
-| `vmwarevcenter` | VMware vCenter | ✓ |   |   |   |   |   |
-| `wago` | WAGO | ✓ | ✓ |   |   |   |   |
-| `watchguard` | WatchGuard | ✓ |   |   |   |   |   |
-| `xerox` | Xerox | ✓ |   |   |   |   |   |
-| `yealink` | Yealink | ✓ |   |   |   |   |   |
-| `zyxel` | Zyxel | ✓ | ✓ |   |   |   | ✓ |
+| Vendor | Driver | Cert-deploy | Rotate creds | NAC (802.1X) | SCEP | Firmware | Config-backup | AP-LSC | Config-read (API) | Monitor-push |
+|---|---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| `a10` | A10 | ✓ | ✓ |   |   |   |   |   |   |   |
+| `acti` | ACTi | ✓ | ✓ |   |   |   |   |   |   |   |
+| `advantech` | Advantech | ✓ |   |   |   |   |   |   |   |   |
+| `apc` | APC | ✓ | ✓ |   |   |   |   |   |   |   |
+| `arista` | Arista | ✓ | ✓ |   |   |   | ✓ |   |   |   |
+| `arubacx` | Aruba CX | ✓ | ✓ | ✓ |   |   | ✓ |   |   |   |
+| `audiocodes` | AudioCodes | ✓ |   |   |   |   |   |   |   |   |
+| `avaya` | Avaya | ✓ | ✓ |   |   |   |   |   |   |   |
+| `avigilon` | Avigilon | ✓ |   |   |   |   |   |   |   |   |
+| `avigilonacm` | Avigilon ACM | ✓ |   |   |   |   |   |   |   |   |
+| `axis` | Axis | ✓ | ✓ |   |   | ✓ |   |   |   |   |
+| `barracuda` | Barracuda | ✓ |   |   |   |   |   |   |   |   |
+| `beckhofftwincat` | Beckhoff TwinCAT | ✓ |   |   |   |   |   |   |   |   |
+| `belimo` | Belimo | ✓ |   |   |   |   |   |   |   |   |
+| `bosch` | Bosch | ✓ | ✓ |   |   | ✓ |   |   |   |   |
+| `boschintrusion` | Bosch Intrusion | ✓ |   |   |   |   |   |   |   |   |
+| `brocadeicx` | Brocade ICX | ✓ | ✓ |   |   |   | ✓ |   |   |   |
+| `brother` | Brother | ✓ |   |   |   |   |   |   |   |   |
+| `cambium` | Cambium | ✓ | ✓ |   |   |   |   |   |   |   |
+| `canon` | Canon | ✓ |   |   |   |   |   |   |   |   |
+| `checkpoint` | Check Point | ✓ |   |   |   |   |   |   |   |   |
+| `cisco9200` | Cisco Catalyst 9200 | ✓ | ✓ | ✓ |   | ✓ | ✓ |   |   |   |
+| `cisco9300` | Cisco Catalyst 9300 | ✓ | ✓ | ✓ |   | ✓ | ✓ |   |   |   |
+| `cisco9500` | Cisco Catalyst 9500 | ✓ | ✓ | ✓ |   | ✓ | ✓ |   |   |   |
+| `ciscoasa` | Cisco ASA | ✓ | ✓ | ✓ |   | ✓ | ✓ |   |   |   |
+| `ciscoftd` | Cisco FTD | ✓ |   |   |   | ✓ |   |   | ✓ | ✓ |
+| `ciscoios` | Cisco IOS (classic) |   |   |   | ✓ |   |   |   |   |   |
+| `ciscoiosxe` | Cisco IOS-XE | ✓ | ✓ | ✓ |   | ✓ | ✓ |   |   |   |
+| `ciscoiosxr` | Cisco IOS-XR | ✓ |   |   |   |   | ✓ |   |   |   |
+| `cisconxos` | Cisco NX-OS | ✓ | ✓ |   |   |   | ✓ |   |   |   |
+| `ciscowlc` | Cisco WLC | ✓ | ✓ |   |   |   | ✓ | ✓ |   |   |
+| `citrixadc` | Citrix ADC | ✓ | ✓ |   |   |   |   |   |   |   |
+| `comware` | Comware | ✓ | ✓ |   |   |   | ✓ |   |   |   |
+| `cradlepoint` | Cradlepoint | ✓ |   |   |   |   |   |   |   |   |
+| `crestron` | Crestron | ✓ | ✓ |   |   |   |   |   |   |   |
+| `cyberpower` | CyberPower | ✓ | ✓ |   |   |   |   |   |   |   |
+| `dahua` | Dahua | ✓ | ✓ |   |   |   |   |   |   |   |
+| `dellome` | Dell OpenManage | ✓ | ✓ |   |   |   |   |   |   |   |
+| `dellos10` | Dell OS10 | ✓ | ✓ |   |   |   | ✓ |   |   |   |
+| `dellpowerstore` | Dell PowerStore | ✓ | ✓ |   |   |   |   |   |   |   |
+| `dellunity` | Dell Unity | ✓ | ✓ |   |   |   |   |   |   |   |
+| `distech` | Distech Controls | ✓ | ✓ |   |   |   |   |   |   |   |
+| `draytek` | DrayTek | ✓ |   |   |   |   |   |   |   |   |
+| `eaton` | Eaton | ✓ |   |   |   |   |   |   |   |   |
+| `edgeos` | EdgeOS | ✓ | ✓ |   |   |   | ✓ |   |   |   |
+| `emersondeltav` | Emerson DeltaV | ✓ |   |   |   |   |   |   |   |   |
+| `emersonpac` | Emerson PACSystems | ✓ |   |   |   |   |   |   |   |   |
+| `extreme` | Extreme | ✓ | ✓ |   |   |   | ✓ |   |   |   |
+| `f5` | F5 | ✓ | ✓ |   |   |   |   |   |   |   |
+| `fortinet` | Fortinet | ✓ | ✓ | ✓ |   | ✓ | ✓ |   |   |   |
+| `fs` | FS | ✓ | ✓ |   |   | ✓ |   |   |   |   |
+| `geovision` | GeoVision | ✓ |   |   |   |   |   |   |   |   |
+| `grandstream` | Grandstream | ✓ | ✓ |   |   |   |   |   |   |   |
+| `hanwha` | Hanwha | ✓ | ✓ |   |   | ✓ |   |   |   |   |
+| `hikvision` | Hikvision | ✓ | ✓ |   |   |   |   |   |   |   |
+| `hirschmann` | Hirschmann | ✓ | ✓ |   |   |   | ✓ |   |   |   |
+| `hitachivsp` | Hitachi VSP | ✓ | ✓ |   |   |   |   |   |   |   |
+| `honeywell` | Honeywell | ✓ |   |   |   |   |   |   |   |   |
+| `hpealletra` | HPE Alletra 5000/6000 & Nimble (NimbleOS) | ✓ | ✓ |   |   |   |   |   |   |   |
+| `hpeoneview` | HPE OneView | ✓ | ✓ |   |   |   |   |   |   |   |
+| `hpeprimera` | HPE Primera | ✓ |   |   |   |   |   |   |   |   |
+| `hpprinter` | HP Printer | ✓ |   |   |   |   |   |   |   |   |
+| `huawei` | Huawei | ✓ | ✓ |   |   |   | ✓ |   |   |   |
+| `ibmstorage` | IBM Storage | ✓ | ✓ |   |   |   |   |   |   |   |
+| `ifm` | ifm | ✓ | ✓ |   |   |   |   |   |   |   |
+| `infinidat` | Infinidat | ✓ | ✓ |   |   |   |   |   |   |   |
+| `ipro` | i-PRO | ✓ | ✓ |   |   |   |   |   |   |   |
+| `jcimetasys` | JCI Metasys | ✓ |   |   |   |   |   |   |   |   |
+| `juniper` | Juniper | ✓ | ✓ | ✓ |   | ✓ | ✓ |   |   |   |
+| `kemp` | Kemp | ✓ | ✓ |   |   |   |   |   |   |   |
+| `konica` | Konica Minolta | ✓ |   |   |   |   |   |   |   |   |
+| `lenels2netbox` | LenelS2 NetBox | ✓ |   |   |   |   |   |   |   |   |
+| `mercury` | Mercury Security | ✓ |   |   |   |   |   |   |   |   |
+| `mikrotik` | MikroTik | ✓ | ✓ |   |   |   | ✓ |   |   |   |
+| `mitsubishimelsec` | Mitsubishi MELSEC | ✓ |   |   |   |   |   |   |   |   |
+| `moxa` | Moxa | ✓ | ✓ |   |   |   |   |   |   |   |
+| `netapp` | NetApp | ✓ | ✓ |   |   |   |   |   |   |   |
+| `netgear` | Netgear | ✓ | ✓ |   |   |   | ✓ |   |   |   |
+| `nutanix` | Nutanix | ✓ |   |   |   |   |   |   |   |   |
+| `omronnx` | Omron NX | ✓ |   |   |   |   |   |   |   |   |
+| `onvif` | ONVIF | ✓ | ✓ |   |   |   |   |   |   |   |
+| `opengear` | Opengear | ✓ | ✓ |   |   |   |   |   |   |   |
+| `opnsense` | OPNsense | ✓ |   |   |   |   |   |   |   |   |
+| `opto22` | Opto 22 | ✓ |   |   |   |   |   |   |   |   |
+| `paloalto` | Palo Alto | ✓ | ✓ | ✓ |   | ✓ | ✓ |   |   |   |
+| `peplink` | Peplink | ✓ |   |   |   |   |   |   |   |   |
+| `pfsense` | pfSense | ✓ | ✓ |   |   |   |   |   |   |   |
+| `phoenixplcnext` | Phoenix PLCnext | ✓ | ✓ |   |   |   |   |   |   |   |
+| `poly` | Poly | ✓ |   |   |   |   |   |   |   |   |
+| `powerscale` | Dell PowerScale | ✓ | ✓ |   |   |   |   |   |   |   |
+| `proxmox` | Proxmox | ✓ | ✓ |   |   |   |   |   |   |   |
+| `purestorage` | Pure Storage | ✓ | ✓ |   |   |   |   |   |   |   |
+| `qnap` | QNAP | ✓ |   |   |   |   |   |   |   |   |
+| `radware` | Radware | ✓ | ✓ |   |   |   |   |   |   |   |
+| `raritan` | Raritan | ✓ | ✓ |   |   |   |   |   |   |   |
+| `redfish` | Redfish (iDRAC/iLO) | ✓ | ✓ |   |   |   |   |   |   |   |
+| `ricoh` | Ricoh | ✓ |   |   |   |   |   |   |   |   |
+| `rockwellstratix` | Rockwell Stratix | ✓ | ✓ |   |   |   |   |   |   |   |
+| `ruckus` | Ruckus | ✓ |   |   |   |   | ✓ |   |   |   |
+| `servertech` | Server Technology | ✓ | ✓ |   |   |   |   |   |   |   |
+| `siemensdesigo` | Siemens Desigo | ✓ |   |   |   |   |   |   |   |   |
+| `siemenss7` | Siemens S7 | ✓ | ✓ |   |   |   |   |   |   |   |
+| `siemenss71200` | Siemens S7-1200 | ✓ | ✓ |   |   |   |   |   |   |   |
+| `sonicwall` | SonicWall | ✓ |   |   |   |   | ✓ |   |   |   |
+| `sophos` | Sophos | ✓ |   |   |   |   |   |   |   |   |
+| `synology` | Synology | ✓ | ✓ |   |   |   |   |   |   |   |
+| `tridium` | Tridium Niagara | ✓ |   |   |   |   |   |   |   |   |
+| `tripplite` | Tripp Lite | ✓ | ✓ |   |   |   |   |   |   |   |
+| `truenas` | TrueNAS | ✓ | ✓ |   |   |   |   |   |   |   |
+| `twon` | 2N | ✓ |   |   |   | ✓ |   |   |   |   |
+| `unifi` | UniFi | ✓ |   | ✓ |   |   | ✓ |   |   |   |
+| `uniview` | Uniview | ✓ | ✓ |   |   |   |   |   |   |   |
+| `vertiv` | Vertiv | ✓ | ✓ |   |   |   |   |   |   |   |
+| `vivotek` | Vivotek |   | ✓ |   |   |   |   |   |   |   |
+| `vmwareesxi` | VMware ESXi | ✓ | ✓ |   |   |   |   |   |   |   |
+| `vmwarensx` | VMware NSX | ✓ | ✓ |   |   |   |   |   |   |   |
+| `vmwarevcenter` | VMware vCenter | ✓ |   |   |   |   |   |   |   |   |
+| `wago` | WAGO | ✓ | ✓ |   |   |   |   |   |   |   |
+| `watchguard` | WatchGuard | ✓ |   |   |   |   |   |   |   |   |
+| `xerox` | Xerox | ✓ |   |   |   |   |   |   |   |   |
+| `yealink` | Yealink | ✓ |   |   |   |   |   |   |   |   |
+| `zyxel` | Zyxel | ✓ | ✓ |   |   |   | ✓ |   |   |   |
 
 **Manage/read key** — *Cert-deploy*: issue + install + bind a TLS cert. *Rotate*: change the device admin password on a
 schedule ("LAPS for cameras"). *NAC*: write RADIUS + 802.1X/MAB to the fabric. *SCEP*: on-device CSR enrolment. *Firmware*:
 read the running version for CVE-matching. *Config-backup*: pull the running-config over SSH, versioned + change-detected.
+*AP-LSC*: provision locally-significant certs onto wireless APs through the controller. *Config-read (API)*: config snapshot
+over the management API (API-managed gear with no SSH show-run). *Monitor-push*: at enrol the driver configures the device
+itself to send syslog + SNMP at the Skans collector. Some drivers carry additional lanes gated behind per-vendor env flags
+(off by default); each cell reflects the capability set advertised by the running build.
 
 A few platforms accept a certificate but expose **no API to bind it** to their web service — **OPNsense** is the notable one
 (upstream limitation). Skans imports the cert and reports the mismatch honestly; the one-time selection is manual (System →
