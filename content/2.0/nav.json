@@ -69,6 +69,10 @@
         "slug": "how-tos/patching"
       },
       {
+        "title": "Skans Update Service (SUS)",
+        "slug": "how-tos/skans-update-service"
+      },
+      {
         "title": "Backup & recovery",
         "slug": "how-tos/backup"
       },

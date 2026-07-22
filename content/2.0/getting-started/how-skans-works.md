@@ -8,6 +8,8 @@ Skans is a single self-contained appliance that delivers and manages the entire 
 
 It's built to be run by the technician who installs the equipment — not a security team. You answer two or three plain questions and press one button; everything underneath (directory, certificate authority, network access control, monitoring) is handled for you.
 
+Optional **[Skans Update Service (SUS)](/2.0/how-tos/skans-update-service/)** is the single upstream a *connected* appliance can use to pull signed product packs, driver packs, security feeds, and ClamAV definitions — endpoints never call SUS; only the appliance does, and only when you enable it.
+
 ::: note
 This page is the mental model. If you just want to get a box running, jump to the **[Quickstart](/2.0/getting-started/quickstart/)**. If you're an admin who wants the deeper architecture, each concept below links out to detail.
 :::
@@ -57,7 +59,7 @@ Skans fixes that by **becoming the authority** the enclave never had:
 - It gives **every device its own identity** — a real X.509 certificate issued by that CA.
 - It adds the controls that identity makes possible: access control, patching, hardening, backup, monitoring — and audit-ready evidence that it's all happening.
 
-Nothing leaves the wire. When a feature needs outside data (a patch, a threat feed, a new driver), it arrives as a **signed bundle** that the appliance verifies before use — never by opening the enclave to the internet.
+Your data never leaves the wire. When a feature needs outside data (a patch, a threat feed, a new driver), it arrives as a **signed bundle** the appliance verifies before use, and endpoints never reach the internet. (A connected site may opt the appliance itself into a direct online pull.)
 
 ## Two lanes: how devices get an identity
 
@@ -65,7 +67,7 @@ Devices fall into one of two onboarding lanes, and Skans picks the right one aut
 
 **Lane A — agentless (cameras, IoT, OT).** Skans reaches *into* the device using a vendor-specific driver, issues it a certificate from the built-in CA, pushes and binds that cert onto the device, and then **verifies the device is actually serving it** (not "should work" — proven on the wire). Monitoring is agentless: SNMP, syslog, and probes from outside. The device runs nothing of ours.
 
-**Lane B — agent-managed (Windows servers and workstations).** Skans deploys a lightweight **agent** that runs *on* the endpoint and handles patching, inventory, Defender health, compliance checks, logs, and metrics — reporting back over mutual TLS. See **[Install & approve the Windows agent](/2.0/how-tos/install-the-agent/)**.
+**Lane B — agent-managed (Windows servers and workstations).** Skans deploys a lightweight **agent** that runs *on* the endpoint and handles patching, inventory, Defender health, compliance checks, logs, and metrics — reporting back over mutual TLS. A **Linux endpoint agent** (certificate-enrolled `systemd` service) is also shipping — proven at M0 and expanding, though not yet at Windows feature-parity. See **[Install & approve the Windows agent](/2.0/how-tos/install-the-agent/)**.
 
 ::: tip
 Classification is **OS-based, not port-based**. Skans reads what a device actually is (from the directory, with a DNS fallback), so a Windows Server that only has Remote Desktop open is correctly treated as a server on the agent lane — not mis-typed as a workstation. Windows endpoints always go through the agent; SNMP is only ever used for IoT/OT gear.
@@ -76,7 +78,7 @@ Classification is **OS-based, not port-based**. Skans reads what a device actual
 The knowledge of how to talk to each vendor's device lives in the **Skans Driver Pack** — a separately versioned, cryptographically signed artifact, on the same model as a Milestone device pack. Adding or fixing a vendor means shipping a **new pack**, not rebuilding the appliance.
 
 - **123 vendor drivers** ship today, spanning cameras and physical security, network gear, firewalls, servers/BMC, building automation, industrial PLCs, access control, and more.
-- **8 are validated against real hardware** end-to-end (Axis, 2N, Bosch, Uniview/FS, Hanwha, ONVIF, Redfish, UniFi). The rest are authored from each vendor's official management API and adversarially verified, with hardware validation pending.
+- **8 are validated against real hardware** end-to-end (Axis, 2N, Bosch, Uniview/FS, Hanwha, ONVIF, Redfish, UniFi), **another 9 are proven end-to-end on emulated devices (Cisco CML / EVE-NG)** — the Cisco fleet plus Aruba CX — and the rest are authored from each vendor's official management API and adversarially verified, **device-pending**.
 - When a device genuinely has no certificate API, the driver **says so with a clear error rather than faking success** — you secure the conduit (the switch or firewall in front of it) and monitor the device instead.
 
 Critically, the vendor code runs **out-of-process**, in an isolated host that holds no CA key and no secrets. The certificate authority's private key never leaves the trusted core. That keeps third-party driver code — a supply-chain and credential surface — away from the crown jewels.
@@ -96,7 +98,7 @@ The flagship deployment is the **single self-contained appliance** — every ser
 For large or multi-site enclaves, Skans has a **Core + Edge** design: a central Core (the system of record, CA, and console) plus one or more lightweight **Edge** relays per site that collect and forward, holding no CA key. This distributed tier is largely a design-stage capability today; the single appliance is what ships and is proven live.
 
 ::: note
-Skans comes in two engine flavors that look identical to you: a **Windows Server** appliance (the primary SKU, using native AD/AD CS/NPS roles) and an **open-source Linux** SKU (step-ca, Samba, FreeRADIUS) for sites that want no Windows license. Same console, same drivers, same workflow — see **[Requirements](/2.0/getting-started/requirements/)**.
+Skans is a single self-contained **Windows Server** appliance, using the native **AD DS / AD CS / NPS** roles behind one console. Same console, same drivers, same workflow — see **[Requirements](/2.0/getting-started/requirements/)**.
 :::
 
 ## What you actually get

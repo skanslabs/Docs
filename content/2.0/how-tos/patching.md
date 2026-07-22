@@ -6,6 +6,10 @@ description: Keep the enclave patched and its device firmware current without th
 
 Skans keeps an isolated enclave current **without any endpoint reaching the internet**. The appliance's own Windows Update Agent (WUA) pulls updates from Microsoft Update, caches them, and stages a rollout by ring; an offline scan reports what's missing; and a vetted, hash-verified firmware repository covers your cameras and IoT/OT gear. This page is honest about what's fully shipped versus what's still being hardened.
 
+::: note
+**Windows / Microsoft patches are not delivered by the Skans Update Service.** SUS carries Skans **product/agent** channel packs, **driver packs**, **security feeds**, and **ClamAV defs** — see **[Skans Update Service (SUS)](/2.0/how-tos/skans-update-service/)**. Do not confuse SUS with the WUA ring path on this page.
+:::
+
 ## Why not WSUS
 
 WSUS is a **dead end on Windows Server 2025** and Skans does not use it. On a fully-patched retail build, the initial catalog sync floods `invalid update identity in XML` errors and never completes — it behaves like an open Microsoft-side defect, not a misconfiguration. So Skans took a different, air-gap-native path: the appliance itself is the update source, and the agent does the installing.

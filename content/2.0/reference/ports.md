@@ -62,6 +62,10 @@ These ports are named explicitly in the Skans service and architecture docs. The
 
 ::: note
 Skans binds its own services in one reserved, adjacent block — **7326** agent hub, **7327** Edge↔Core, **7328** console — chosen off collision-prone defaults and adjacent so a single firewall rule (`allow 7326-7328`) covers the appliance. This is confirmed live on the flagship appliance, not just spec-quoted. If a firewall rule or bookmark still points at a legacy port, update it to the block above.
+
+### Optional outbound: Skans Update Service
+
+A **connected** appliance that uses the [Skans Update Service](/2.0/how-tos/skans-update-service/) needs **outbound HTTPS (TCP 443)** from the appliance to **`sus.skanslabs.com`**. That traffic is initiated by the control plane only (check-in and content download). Agents and IoT/OT devices do **not** need SUS allowlisted — they talk only to the appliance.
 :::
 
 ::: note
