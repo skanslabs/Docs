@@ -45,15 +45,20 @@ The model is **state-based plus count-growth**:
 
 **MITRE ATT&CK enrichment.** Alerts are tagged with relevant ATT&CK technique IDs, so a finding arrives with context for triage rather than as a bare event.
 
+**First-party detection packs.** IoT/OT and network rules ship as versioned **content packs** (for example `skans.detection.core` **0.4.0**) under `C:\Skans\detection-packs`. The collector loads the highest pack version, merges into the alert engine, and publishes the **effective** rule set (including pack source) so the console can show what is actually running. Packs are **Skans-authored only** — no third-party SIEM rule libraries. Syslog is **decoded** into stable fields before rules match. Full story: **[Detection content & response](/2.0/monitoring/detection-content/)**.
+
+**Incidents worklist.** Correlated cases land under **Security → Incidents**. From an incident the operator can open **Respond** for fabric/identity actions (isolate port, restore, quarantine VLAN, revoke cert) — always **confirm-gated**, never automatic on rule fire.
+
 ::: note
-A specific **failed-logon (4625) brute-force** count-growth rule is being wired up as part of the current data-plane work. The signal it needs — the agent pushing 4625 as SYSTEM within seconds — already flows today; treat the packaged brute-force *rule* as near-term rather than long-proven.
+A **failed-logon (4625)** signal rides the agent lane today. Packaged count-growth / brute-force *rules* continue to expand with the data plane; treat deep host XDR parity as out of scope — pair with a dedicated EDR if you need it.
 :::
 
 ## Alert rules & notifications: the /alerting console
 
-The engine above ships with an operator console over it — **Alerting** (`/alerting`), added 2026-07-16 and gated by the **`alert.manage`** capability:
+The engine above ships with an operator console over it — **Alerting** (`/alerting`), gated by the **`alert.manage`** capability:
 
 - **Rule management** — enable, disable, and tune the packaged rules from the console. A save goes live on the engine's next evaluation cycle; no service restart.
+- **Pack inventory** — which detection pack versions loaded (for example `skans.detection.core@0.4.0`) and effective rule source (builtin vs pack).
 - **Suppressions with a compliance guardrail** — a suppression silences a rule for a host pattern for a bounded window. If the rule is **compliance-tagged** (for example a rule that evidences **NIST AU-6**), the console **requires a written justification** before it accepts the suppression. The record — who, why, until when — is written to the audit log as an explicit **risk acceptance** and surfaced to the compliance view, so a silenced control is never an invisible gap.
 - **Snooze with expiry** — a snooze always carries an expiry; nothing gets silenced indefinitely by accident.
 - **Escalation / renotify** — an unacknowledged alert can re-notify on a configured interval instead of being sent once and forgotten.
@@ -99,11 +104,12 @@ The full list is in **[Ports & protocols](/2.0/reference/ports/)**.
 ## What Skans monitoring is NOT
 
 ::: warning
-Skans monitoring is **push-first collection plus correlation — not a full IDS/EDR.** It records, correlates, and alerts on what devices and endpoints report; it does not do deep host behavioral detection or network intrusion analysis. **Pair Skans with a dedicated IDS/EDR** for complete NIST *Detect* coverage. Skans is also explicitly **not a SIEM, not an NVR, and not an NMS** — those are out of scope by design.
+Skans monitoring is **push-first collection plus correlation — not a full IDS/EDR.** It records, correlates, and alerts on what devices and endpoints report; it does not do deep host behavioral detection or network intrusion analysis. **Pair Skans with a dedicated IDS/EDR** for complete NIST *Detect* coverage. Skans is also explicitly **not a SIEM, not an NVR, and not an NMS** — those are out of scope by design. **Detection never auto-runs active response** — isolate / revoke / host attempt-fix are operator-gated only.
 :::
 
 ## Next
 
+- **[Detection content & response →](/2.0/monitoring/detection-content/)** — packs, Incidents Respond, honest non-AR stance
 - **[Vulnerability management →](/2.0/monitoring/vulnerability-management/)** — CVE + MITRE ATT&CK matched to live inventory
 - **[Install & approve the Windows agent →](/2.0/how-tos/install-the-agent/)** — the Windows push lane
 - **[NIST 800-171 / CMMC evidence →](/2.0/compliance/nist-cmmc-evidence/)** — where monitoring fits the *Detect* function

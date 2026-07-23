@@ -98,6 +98,10 @@
         "slug": "monitoring/alerts"
       },
       {
+        "title": "Detection content & response",
+        "slug": "monitoring/detection-content"
+      },
+      {
         "title": "Syslog ingestion",
         "slug": "monitoring/syslog"
       },

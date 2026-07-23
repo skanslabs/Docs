@@ -25,10 +25,15 @@ Every accepted message runs the same short path:
 
 1. **Parse** — the raw datagram is decoded as RFC 3164 or RFC 5424.
 2. **Tag / correlate** — the message is matched to the **device** that sent it, so the log line is attached to a real entity in the console, not just a source IP.
-3. **Land** — it's written to OpenSearch index **`skans-netlog-*`** with **`Source=syslog`**.
-4. **Evaluate** — the always-on alert engine reads netlog and turns occurrences into **correlated, per-device findings** — not a raw log firehose.
+3. **Decode (first-party)** — a **SyslogDecoder** enriches the document with stable fields when patterns match — for example `auth.result`, `iface` / `iface.state`, `firewall.action`, `config.action`, `port.security`, `stp.event`, `poe.event`, `system.event`, plus best-effort `vendor.guess`. Rules match those fields instead of fragile one-off message substrings.
+4. **Land** — written to OpenSearch index **`skans-netlog-*`** with **`Source=syslog`** (promoted decoder keys at top level for queries).
+5. **Evaluate** — the always-on alert engine, including **first-party detection packs**, turns occurrences into **correlated, per-device findings** — not a raw log firehose.
 
 This is the same push-first, event-driven model the rest of Skans monitoring uses: the device announces on occurrence, Skans correlates, and you see a bounded number of meaningful alerts rather than every line the device ever emitted.
+
+::: tip
+Pack rules cover common IoT/OT and network cases (auth failure, link down, firewall deny, config change, port-security, spanning-tree / BPDU, PoE power deny, device reload, ICS fault). See **[Detection content & response](/2.0/monitoring/detection-content/)**.
+:::
 
 ## Security: source-IP allowlist
 
@@ -74,6 +79,7 @@ Netlog data lands in **OpenSearch** under a **~365-day** retention posture. Be c
 ## Next
 
 - [Monitoring & alerts](/2.0/monitoring/alerts/)
+- [Detection content & response](/2.0/monitoring/detection-content/)
 - [Ports & protocols](/2.0/reference/ports/)
 - [Install & approve the Windows agent](/2.0/how-tos/install-the-agent/)
 - [Enroll a device](/2.0/how-tos/enroll-a-device/)

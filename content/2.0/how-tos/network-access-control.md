@@ -6,7 +6,7 @@ description: Turn on RADIUS 802.1X EAP-TLS so only devices holding a Skans-issue
 
 Network access control decides what is allowed onto the wire. Turn it on and a device that holds a **Skans-issued certificate** is admitted to its port; a device without one is rejected at the switch and never reaches the segment. This is the AC-3 / IA-3 enabler for the enclave — identity-gated network admission, driven from the console.
 
-The admission engine is the appliance's native **Windows NPS (RADIUS)** role. The installer stands it up alongside **AD CS** (which issues the certificates) and **AD DS / GPO** (which distributes the trust), and hides all three behind the console. The open-source SKU substitutes FreeRADIUS as a secondary, less-proven lane; the EAP-TLS flow below is the proven Windows path.
+The admission engine is the appliance's native **Windows NPS (RADIUS)** role. The installer stands it up alongside **AD CS** (which issues the certificates) and **AD DS / GPO** (which distributes the trust), and hides all three behind the console. The EAP-TLS flow below is the proven Windows path.
 
 ## Before you start
 
@@ -94,9 +94,28 @@ This is **partial today.** The platform supports it — NPS authorizes the RADIU
 
 A device that fundamentally can't hold a certificate or speak 802.1X is **not** put on the wire by 802.1X. The honest posture is to **segment** it, put a **protective gateway** in front of it, **allow-list** only the flows it genuinely needs, and **monitor** it — compensating controls, not fake admission. The vendor driver returns a clear error rather than claiming success. See the *"When a device can't take a certificate"* section of **[Enroll a device](/2.0/how-tos/enroll-a-device/)**.
 
+## Part 3 — Operator port actions (Protect / Isolate / Open)
+
+Admission (Parts 1–2) decides who gets on the wire. Separately, an operator with **`nac.manage`** can act on a **single wired attachment** from the console when the appliance has a fabric **write** path (network configurator + write credentials for the controller or switch).
+
+| Action | Effect (typical) | Undo |
+| --- | --- | --- |
+| **Protect** | Apply the site's protect / 802.1X posture on that port (controller-specific) | Site-specific |
+| **Isolate** | Force-unauthorized / shut **that port only** so the endpoint loses the wire | **Open port** (ForceAuthorized) |
+| **Open port** | Restore authorized state on that port after isolate | — |
+
+**Where:** **Device detail** (NAC card) and **Security → Incidents → Respond** on a case tied to that device. Both paths are **confirm-gated** — the alert engine never isolates automatically.
+
+::: warning
+**Lab and production hygiene.** Practice isolate only on a **sacrificial** access port (for example a lab camera). **Do not** isolate domain controllers, uplinks, or agent hosts. OT / Tier-C gear may require an extra OT confirm. Isolate needs a healthy controller write path (for example UniFi with write API credentials already used for Protect).
+:::
+
+See **[Detection content & response](/2.0/monitoring/detection-content/)** for the full response menu (including quarantine VLAN and cert revoke) and the no-auto-AR policy.
+
 ## Next
 
 - **[Enroll a device](/2.0/how-tos/enroll-a-device/)** — get agentless devices their certificate first
 - **[Install & approve the Windows agent](/2.0/how-tos/install-the-agent/)** — machine certificates for Windows endpoints
+- **[Detection content & response](/2.0/monitoring/detection-content/)** — Incidents Respond and isolation boundaries
 - **[Device identity](/2.0/concepts/device-identity/)** — what the certificate is and why it's the trust anchor
 - **[NIST 800-171 / CMMC evidence](/2.0/compliance/nist-cmmc-evidence/)** — how network admission maps to AC-3 / IA-3

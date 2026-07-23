@@ -61,8 +61,8 @@ Both paths end in the same place: **CMS-verified packs** applied by the control 
 | `feed-attack` | `threat-feed` | OpenSearch `skans-attack` (MITRE ATT&CK Enterprise) |
 | `feed-attack-ics` | `threat-feed` | OT/ICS ATT&CK content (ingest with other threat feeds) |
 | `feed-epss` | `threat-feed` | OpenSearch `skans-epss` (FIRST.org EPSS scores) |
-| `feed-sigma` | `threat-feed` | OpenSearch `skans-sigma` (detection rules) |
-| `clamav-defs` | `clamav-defs` | Live defs mirror `C:\Skans\share\clamav\` + `current.json` |
+| `feed-sigma` | `threat-feed` | OpenSearch `skans-sigma` (Sigma rule **reference** index — not the AlertEngine product pack path) |
+| `clamav-defs` | `clamav-defs` | Live defs mirror `C:\Skans\share\clamav\` + `current.json` (file apply; not an OpenSearch feed) |
 | `product` | `product` | Staged under `C:\Skans\updates\product\{version}\` + `current.json` |
 | `agent` | `agent` | Staged under `C:\Skans\updates\agent\{version}\` + `current.json` |
 
@@ -70,6 +70,10 @@ Security feeds are refreshed upstream on a **daily change-detect** schedule. Dri
 
 ::: tip
 **Product and agent channel packs** prove the signed delivery path today; **GA release artifacts** replace stubs as Skans ships installers. Apply still lands versioned directories and `current.json` pointers either way — installing/swapping a running agent or product build is a separate operator/agent step that consumes those pointers.
+:::
+
+::: note
+**Sigma vs detection packs.** SUS Sigma content is indexed for search/reference (`skans-sigma`). Runtime IoT/OT **AlertEngine** rules ship as first-party **detection packs** (for example `skans.detection.core`) — see **[Detection content & response](/2.0/monitoring/detection-content/)**. Skans does not treat third-party Sigma libraries as the product detection brain.
 :::
 
 ### Explicitly out of scope on SUS

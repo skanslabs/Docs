@@ -12,12 +12,13 @@ This is the current-release summary for **Skans 2.0** — the first shipping rel
 
 ## Recent releases
 
+- **2026-07-23 — Detection packs 0.4.0, operator-gated response, Attempt fix.** First-party **`skans.detection.core` 0.4.0** (decode-then-rule: auth, link, firewall, config, port-security, **STP/BPDU**, **PoE**, **reload**, ICS fault) loads on the collector and shows as the effective pack. **Incidents → Respond** and device NAC **Isolate / Open** are confirm-only fabric actions (no auto active response). **Security → Vulnerabilities → Attempt fix** queues signed host remediation for enrolled agents only. SUS apply path covers Sigma index, ClamAV defs mirror, and product/agent staging. See **[Detection content & response](/2.0/monitoring/detection-content/)**, **[Vulnerability management](/2.0/monitoring/vulnerability-management/)**, **[802.1X / port actions](/2.0/how-tos/network-access-control/)**.
 - **2026-07-17 — Agent v0.4.0: security hardening + verified self-update.** An agent's identity is now bound to its **authenticated mTLS certificate** — never to anything the client reports about itself — and signed command sets are bound to the specific target agent, so a command captured from one agent cannot be replayed to another. Self-update verifies every release (SHA-256 + Authenticode) before a staged swap with rollback, and v0.4.0 rolled out fleet-wide through that channel. Alongside it: driver packs **2026.7.16e** (Cisco Catalyst 9200/9300/9500 switches + ASA firewalls) and the **2026.7.17** series (Cisco FTD full lanes — certificate renewal, API config snapshot, and driver-automated telemetry configuration — plus ASA monitor-push, IOS-XR, and Catalyst 9800 AP-LSC).
 - **2026-07-16 — Alert Rules & Notifications.** The **`/alerting`** console page: alert-rule management, suppressions with a recorded-justification guardrail on compliance-tagged rules, snooze with expiry, escalation / renotify, and per-channel notification delivery health. See **[Alerts & monitoring](/2.0/monitoring/alerts/)**.
 
 ## Platform & runtime — Shipped
 
-The flagship is a **single self-contained Windows Server appliance** (an open-source Linux SKU is the secondary flavor), sized for one site of **up to ~5,000 devices** (SRS PERF-01). Everything runs on the enclave — no runtime internet dependency.
+The flagship is a **single self-contained Windows Server appliance**, sized for one site of **up to ~5,000 devices** (SRS PERF-01). Everything runs on the enclave — no runtime internet dependency.
 
 - **Runtime:** .NET 10; an ASP.NET Core + Blazor console bound on **:7328** (HTTPS).
 - **Stores:** SQL Server / SQL Express holds control-plane state; OpenSearch holds telemetry, metrics, events, inventory, and vulnerabilities. Volume lives in OpenSearch, which is why the relational DB stays tiny.
@@ -28,7 +29,7 @@ See **[Ports & endpoints](/2.0/reference/ports/)** for the full list.
 
 ## Identity & CA — Shipped
 
-The appliance **becomes the enclave's root of trust**. On the Windows SKU it stands up native **AD DS** (domain controller, DNS, Kerberos, GPO) and an **AD CS Enterprise Root CA** ("Skans Root CA") that auto-publishes its root to Trusted Root and NTAuth and enables GPO auto-enrollment. The Linux SKU delivers the same outcome through step-ca, Samba, and FreeRADIUS behind a provider abstraction.
+The appliance **becomes the enclave's root of trust**. It stands up native **AD DS** (domain controller, DNS, Kerberos, GPO) and an **AD CS Enterprise Root CA** ("Skans Root CA") that auto-publishes its root to Trusted Root and NTAuth and enables GPO auto-enrollment.
 
 - Per-device X.509 identity issued from the built-in CA — no shared passwords.
 - The CA private key is **TPM-backed by default** (Microsoft Platform Crypto Provider, non-exportable); an HSM / CNG-KSP is overridable.
@@ -37,21 +38,21 @@ See **[Device identity](/2.0/concepts/device-identity/)**.
 
 ## Network access control — Shipped
 
-**802.1X EAP-TLS** admission via NPS keeps unknown devices off the wire — proven end-to-end (Access-Accept, NPS Security event 6272). RADIUS-assigned VLANs segment camera/IoT gear.
+**802.1X EAP-TLS** admission via NPS keeps unknown devices off the wire — proven end-to-end (Access-Accept, NPS Security event 6272). RADIUS-assigned VLANs segment camera/IoT gear. Operators with fabric write access can **Protect / Isolate / Open** a single wired port from device detail or Incidents → Respond (confirm-gated, not automatic).
 
-See **[Network access control](/2.0/how-tos/network-access-control/)**.
+See **[Network access control](/2.0/how-tos/network-access-control/)** and **[Detection content & response](/2.0/monitoring/detection-content/)**.
 
 ## Two device lanes & the driver pack — Shipped
 
 Skans manages devices in two lanes, chosen automatically by device type:
 
-- **Agent-managed Windows endpoints** — the Skans agent ships inventory, metrics, Defender health, WUA patching, and log shipping over mTLS. Windows event collection is the always-on **agent** lane.
+- **Agent-managed Windows endpoints** — the Skans agent ships inventory, metrics, Defender health, WUA patching, and log shipping over mTLS. Windows event collection is the always-on **agent** lane. A **Linux endpoint agent** (certificate-enrolled `systemd` service) is also shipping — proven at M0 and expanding, not yet at Windows feature-parity.
 - **Agentless IoT / OT / network gear** — the collector SNMP-polls and ingests syslog and traps. Rule: **Windows is never SNMP-polled.**
 
 Vendor knowledge lives in the **Skans Driver Pack** — a signed, separately versioned artifact loaded at runtime, out-of-process in `Skans.DriverHost`, with hot-reload proven (no console restart).
 
 ::: warning
-**123 vendor drivers ship. 8 are validated on real hardware** — Axis, 2N, Bosch, Uniview/FS, Hanwha, ONVIF, Redfish, and UniFi — **and another 8 end-to-end on emulated devices** in Cisco CML / EVE-NG: the Cisco fleet (Catalyst 9000v switches, ASAv, IOS-XE routers, Nexus 9300v, and the Catalyst 9800-CL wireless controller) plus Aruba CX. The rest are authored from each vendor's official management API and **device-pending** — do not assume all 123 are proven on real devices. When a device genuinely can't take a certificate, the driver returns a **clear error rather than faking success**; you secure the conduit and monitor the device instead. OT PLCs are handled by read-only EtherNet/IP and Modbus monitoring.
+**123 vendor drivers ship. 8 are validated on real hardware** — Axis, 2N, Bosch, Uniview/FS, Hanwha, ONVIF, Redfish, and UniFi — **and another 9 end-to-end on emulated devices** in Cisco CML / EVE-NG: the Cisco fleet (Catalyst 9000v switches, ASAv, IOS-XE routers, Nexus 9300v, the Catalyst 9800-CL wireless controller, and Cisco FTD) plus Aruba CX. The rest are authored from each vendor's official management API and **device-pending** — do not assume all 123 are proven on real devices. When a device genuinely can't take a certificate, the driver returns a **clear error rather than faking success**; you secure the conduit and monitor the device instead. OT PLCs are handled by read-only EtherNet/IP and Modbus monitoring.
 
 **Wireless AP certificates (Cisco Catalyst 9800) — new.** An opt-in capability provisions the controller's CAPWAP access points with enclave-CA identity certificates (**AP-LSC** via SCEP), so wireless APs carry the same enclave identity as everything else — not a factory certificate. The disruptive MIC→LSC join cutover is **gated off by default**, so it is safe to stage on a live controller. The controller-to-CA SCEP transport and CA trust are proven against the appliance's built-in NDES responder; full per-AP enrollment validates with the site's own access points.
 :::
